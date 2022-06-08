@@ -50,7 +50,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // app.use("/css", express.static("tinder_clone/build/static/css"));
 // app.use("/js", express.static("tinder_clone/build/static/js"));
 // app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
-app.use(express.static("tinder_clone/build"));
+// app.use(express.static("tinder_clone/build"));
 // app.use(express.static("tinder_clone/build/index.html"));
 //// or we can use this below requste responce handeler
 
@@ -135,9 +135,9 @@ io.on("connection", (socket) => {
 ///////
 
 ////  below are all http handlers routes
-// app.get("/", async (req, res) => {
-//   res.send("its Working express server");
-// });
+app.get("/", async (req, res) => {
+  res.send("its Working express server");
+});
 // app.get("/", function (req, res) {
 //   res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
 // });
