@@ -1,0 +1,25 @@
+{
+  "name": "tinder_backend",
+  "version": "1.0.0",
+  "description": "\"tinder MERN STACK backend\"",
+  "main": "server.js",
+  "scripts": {
+    "start": " nodemon server.js"
+  },
+  "author": "Hardik_Mistry",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.1",
+    "express-async-errors": "^3.1.1",
+    "google-auth-library": "^8.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.3.3",
+    "multer": "^1.4.4",
+    "nodemon": "^2.0.16",
+    "socket.io": "^4.5.0",
+    "socketio-file-upload": "^0.7.3"
+  }
+}
