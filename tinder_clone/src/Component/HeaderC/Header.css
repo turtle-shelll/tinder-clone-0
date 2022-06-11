@@ -1,0 +1,11 @@
+.header{
+    /* font-size: 3rem; */
+    background-color: lightgray;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.header .Logo-image{
+    width: 45px;
+    height: 45px;
+}

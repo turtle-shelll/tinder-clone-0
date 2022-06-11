@@ -1,0 +1,97 @@
+.back_ground_container {
+    background-color: rgba(0, 0, 0, 0.324);
+    max-width: 100vw;
+    min-width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+}
+
+.back_ground_container h1 {
+    width: 100%;
+    text-align: center;
+    color: white;
+}
+
+.update_image_container {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+}
+
+.update_image_container .update_image_box {
+    width: 80%;
+    height: fit-content;
+    margin: 1rem auto;
+    overflow: hidden;
+    border-radius: 1rem;
+}
+
+.update_image_container .update_image_box .image {
+    width: 100%;
+    height: 350px;
+    background-position: center;
+    /* object-fit: cover; */
+}
+
+.update_image_container .update_image_box .image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.update_image_container .update_image_box .caption_container {
+    width: 100%;
+    text-align: center;
+    height: fit-content;
+    word-wrap: break-word;
+    background-color: lightgray;
+}
+
+#caption {
+    padding: 0.5rem 1rem;
+    width: 100%;
+    /* padding-left: 1rem; */
+    /* word-wrap: break-word; */
+    max-height: 4rem;
+    min-height: fit-content;
+    line-height: 1.2rem;
+    font-size: 0.8rem;
+    /* word-break: break-all; */
+    border: none;
+    outline: none;
+}
+
+.update_image_container .update_image_box .bottom_btn {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    align-items: center;
+}
+
+.update_image_container .update_image_box .bottom_btn .btns {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: gray;
+}
+
+.update_image_container .update_image_box .bottom_btn .btns .MuiIconButton-root {
+    margin: 0.5rem;
+    background-color: aliceblue;
+    box-shadow: 0px 5px 12px rgba(0, 0, 0, 0.36);
+}
+
+.color-red {
+    color: red !important;
+}
+
+.color-green {
+    color: green !important;
+    /* background-color: green; */
+}

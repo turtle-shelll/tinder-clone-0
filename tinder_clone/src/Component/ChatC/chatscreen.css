@@ -1,0 +1,157 @@
+.chat_screen {
+    background: rgba(0, 0, 100, 0.075);
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    /* padding-left: 0px; */
+    /* background-color: red; */
+}
+
+.chat_container {
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    min-width: 100vw;
+    max-width: 100vw;
+    max-height: 85vh;
+    min-height: 85vh;
+    margin: 0;
+    padding: 0px;
+    padding-bottom: 0.2rem;
+}
+
+.match_date {
+    text-align: center;
+    position: sticky;
+    top: 0;
+    height: fit-content;
+    background-color: grey;
+    width: fit-content;
+    margin: 10px auto;
+    padding: 5px 10px;
+    border-radius: 2rem;
+    font-size: 0.6rem;
+}
+
+.text_container {
+    display: flex;
+    /* align-items: center; */
+    margin: 0.5rem;
+    gap: 0rem;
+}
+
+.profile_frame {
+    margin: 0px -12px;
+}
+
+.text {
+    background: lightGrey;
+    /* text-align:center; */
+    padding: 0.5rem 0.8rem;
+    width: fit-content;
+    height: fit-content;
+    border-radius: 10px;
+    min-width: 20px;
+    max-width: 250px;
+    word-break: break-word;
+}
+
+.image_container {
+    /* background: red; */
+    /* text-align:center; */
+    /* padding: 0.5rem 0.8rem; */
+    width: fit-content;
+    height: fit-content;
+    /* border-radius: 10px; */
+    padding: 0;
+    margin: 0;
+    min-width: 20px;
+    /* max-width: 250px; */
+    /* word-break: break-word; */
+}
+
+.textFrom_me {
+    background: lightBlue;
+    text-align: center;
+    padding: 0.5rem 0.8rem;
+    width: fit-content;
+    height: fit-content;
+    border-radius: 10px;
+    min-width: 20px;
+    max-width: 250px;
+    word-break: break-word;
+    margin-left: auto;
+}
+
+.imageFrom_me {
+    /* background: lightBlue; */
+    text-align: center;
+    /* padding: 0.5rem 0.8rem; */
+    width: fit-content;
+    height: fit-content;
+    /* border-radius: 10px; */
+    min-width: 20px;
+    max-width: 250px;
+    /* word-break: break-word; */
+    /* margin: 0.5rem; */
+    /* margin-right: 2rem; */
+    margin-left: auto;
+}
+
+.bottomCat_container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* background: red; */
+}
+
+.input_div {
+    width: 100%;
+    height: 2rem;
+    display: flex;
+}
+
+.inp {
+    border: 1px solid lightGrey;
+    outline: none;
+    padding-left: 1rem;
+    flex: 1;
+    height: 2rem;
+}
+
+.sendBtn {
+    width: fit-content;
+    height: 2rem;
+    padding: 0.3rem;
+    background: lightGrey;
+    border: 2px solid gray;
+}
+
+.sendBtn:hover {
+    background: lightBlue;
+}
+
+#siofu::-webkit-file-upload-button {
+    visibility: hidden;
+}
+
+#siofu {
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+    background: white;
+    border: 2px solid lightGrey;
+}
+
+#siofu::before {
+    content: url("./add_image.png");
+    width: 100%;
+    padding-top: 2px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+
+}
