@@ -61,6 +61,12 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // });
 
 app.use(express.json());
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
+  });
+}
 
 /// socket.io for getting real time images from client side socket handeler
 app.use(socketioFileUploader.router);
@@ -135,9 +141,9 @@ io.on("connection", (socket) => {
 ///////
 
 ////  below are all http handlers routes
-app.get("/", async (req, res) => {
-  res.send("its Working express server");
-});
+// app.get("/", async (req, res) => {
+//   res.send("its Working express server");
+// });
 // app.get("/", function (req, res) {
 //   res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
 // });
