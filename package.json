@@ -6,8 +6,8 @@
   "scripts": {
     "start": " node server.js",
     "dev": "nodemon server.js",
-    "install_dependencies": "cd tinder_clone && npm install",
-    "build_frontend": "cd tinder_clone && npm run build --production",
+    "install_dependencies": "cd /tinder_clone && npm install",
+    "build_frontend": "cd /tinder_clone && npm run build --production",
     "heroku-postbuilt": "npm run install_dependencies && npm run build_frontend"
   },
   "author": "Hardik_Mistry",
