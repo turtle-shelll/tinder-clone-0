@@ -53,34 +53,7 @@ export default function ChatScreen() {
   const param = useLocation().state.data;
   console.log("param", param);
   const [input, setInput] = useState("");
-  const [messages, setMessage] = useState([
-    {
-      messageFrom: param.name,
-      profile: param.profilePic,
-      message: {
-        textMessage:
-          "hey there whatsapp!hjkfblwuiblfiuqwbjfliuwbiblj loremipsomek cljiriuhqbwjfiubfiuhby  h;oih hddiuhiuhbiue iHHDIUD  IOAHEDHBJDIUHIIifejkffbiuewfiub  ioheiufhwbfbiu",
-      },
-    },
-    {
-      messageFrom: param.name,
-      profile: param.profilePic,
-      message: { textMessage: param.message },
-    },
-    {
-      messageFrom: user._id,
-      profile:
-        "https://i.pinimg.com/originals/f7/8d/2c/f78d2c667a9749225ef905da714cbff6.jpg",
-      message: { textMessage: "help me come fast." },
-    },
-    {
-      messageFrom: param.name,
-      profile: param.profilePic,
-      message: {
-        imageUrl: "burger-gabd7532bd_1920.jpg",
-      },
-    },
-  ]);
+  const [messages, setMessage] = useState([]);
   console.log("messages", messages);
   // console.log("previosMessages==", previosMessages);
   useEffect(() => {
@@ -91,7 +64,10 @@ export default function ChatScreen() {
     // setMessage([...messages, previosMessages]);
     console.log("hey i am loading...");
     setMessage([]);
-    socket.emit("join", conversationId);
+    if (conversationId) {
+      console.log("conversationId", conversationId);
+      socket.emit("join", conversationId);
+    }
   }, [conversationId]);
 
   const sendMessage = async (e) => {

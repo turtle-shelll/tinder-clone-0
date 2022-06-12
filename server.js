@@ -117,9 +117,15 @@ io.on("connection", (socket) => {
   });
   socket.on("join", async (data) => {
     console.log("data from join", data);
-    const previosMessages = await Chats.find({ conversationBy: data })
-      .limit(10)
-      .sort();
+    try {
+      if (data) {
+        const previosMessages = await Chats.find({ conversationBy: data })
+          .limit(10)
+          .sort();
+      }
+    } catch (error) {
+      console.log("error from join", error);
+    }
     console.log("previosMessages", previosMessages);
     socket.emit("getPreviousMessages", previosMessages);
   });
@@ -217,6 +223,9 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
   });
 }
+app.use((err, req, res, next) => {
+  console.log("error from server endpoint", err);
+});
 async function start() {
   try {
     await ConnectDB(process.env.MONGODB_URL);
