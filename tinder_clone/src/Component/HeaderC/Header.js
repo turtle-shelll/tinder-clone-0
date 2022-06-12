@@ -12,8 +12,7 @@ import "./Header.css";
 function Header({ backButton }) {
   const { user } = useSelector((state) => state.root);
   const navigate = useNavigate();
-  // const history = useHistory();
-  // console.log("history",history);
+
   return (
     <div className="header">
       {/* <AccessAlarm/> */}

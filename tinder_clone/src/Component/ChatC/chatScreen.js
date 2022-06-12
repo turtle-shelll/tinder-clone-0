@@ -8,8 +8,9 @@ import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { useSelector, useDispatch } from "react-redux";
 import { setUpdateImageData, setPreviosMessages } from "../../storeSlice";
 import UpdateImage from "./update_Image";
+import { MAIN_URL } from "../../axios"; // axiosInstance
 import socketio from "socket.io-client";
-const ENDPOINT = "https://tinder-backend-000.herokuapp.com/";
+const ENDPOINT = MAIN_URL;
 const socket = socketio(ENDPOINT, { transports: ["websocket"] });
 socket.on("connect", () => {
   console.log("getting Connected");

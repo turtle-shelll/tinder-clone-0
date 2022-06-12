@@ -3,7 +3,7 @@ import React from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { IconButton } from "@material-ui/core";
-import axios from "../../axios";
+import { axios, MAIN_URL } from "../../axios";
 // import axios from "axios";
 import "./imageCard.css";
 import { useDispatch } from "react-redux";
@@ -28,7 +28,7 @@ function ImageCard({
       <div className="imageCard">
         <img
           key={key}
-          src={`https://tinder-backend-000.herokuapp.com/${imageUrl}`}
+          src={`${MAIN_URL}/uploads/${imageUrl}`}
           alt={imageName}
         />
       </div>

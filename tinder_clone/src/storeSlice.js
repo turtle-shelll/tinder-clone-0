@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "./axios";
+import { axios } from "./axios";
 // import axios from "axios";
 
 ///// socket configuration   `http://localhost:5000/`
@@ -14,7 +14,7 @@ export const allUserInitialData = createAsyncThunk(
   async (arg, thunkApi) => {
     try {
       const { data } = await axios.get("/tinder/cards");
-      // console.log("data from server==", data);
+      console.log("data from server==", data);
       if (data.length >= 0) {
         thunkApi.dispatch(setAllUsers(data));
       }
@@ -121,6 +121,9 @@ const userSlice = createSlice({
     setAllUsers: (state, action) => {
       // const profileUser = state.user;
       // console.log("action==", action);
+      // //////////////////////// check this ******************************************************
+      // const data = action.payload;
+      // console.log("data from get all users==", data);
       const newAllUsers = action.payload.filter((profilePerson) => {
         return profilePerson._id !== state.user._id;
       });

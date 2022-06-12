@@ -4,6 +4,7 @@ import { IconButton } from "@material-ui/core";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
+import { MAIN_URL } from "../../axios";
 import { closeIt } from "../../storeSlice";
 import "./updateImage.css";
 function Update_Image({ updateImage }) {
@@ -28,7 +29,7 @@ function Update_Image({ updateImage }) {
         <div className="update_image_box">
           <div className="image">
             <img
-              src={`https://tinder-backend-000.herokuapp.com/uploads/${updateImageData[0]?.message?.imageUrl}`}
+              src={`${MAIN_URL}/uploads/${updateImageData[0]?.message?.imageUrl}`}
               alt={updateImageData[0]?.message?.imageUrl}
             />
           </div>

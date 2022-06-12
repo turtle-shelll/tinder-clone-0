@@ -61,12 +61,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // });
 
 app.use(express.json());
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
-  });
-}
 
 /// socket.io for getting real time images from client side socket handeler
 app.use(socketioFileUploader.router);
@@ -216,7 +210,13 @@ app.delete("/deleteImage/:imageName/:imageID", async (req, res) => {
 app.use("/", userRouter);
 app.use("/", conversation);
 app.use("/", chatsRouter);
-
+if (process.env.NODE_ENV === "production") {
+  console.log("production");
+  app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
+  });
+}
 async function start() {
   try {
     await ConnectDB(process.env.MONGODB_URL);

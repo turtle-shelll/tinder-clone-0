@@ -3,7 +3,7 @@ import SingleChat from "./singleChat";
 import Header from "../HeaderC/Header";
 // import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import axios from "../../axios";
+import { axios } from "../../axios";
 // import axios from "axios";
 import { setConversationId } from "../../storeSlice";
 function Chats() {

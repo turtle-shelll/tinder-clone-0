@@ -4,11 +4,11 @@
   "description": "\"tinder MERN STACK backend\"",
   "main": "server.js",
   "scripts": {
-    "start": " node server.js",
+    "start": " nodemon server.js",
     "dev": "nodemon server.js",
-    "install_dependencies": "cd /tinder_clone && npm install",
-    "build_frontend": "cd /tinder_clone && npm run build --production",
-    "heroku-postbuilt": "npm run install_dependencies && npm run build_frontend"
+    "install_dependencies": "cd tinder_clone && npm install",
+    "build_frontend": "cd tinder_clone && npm run build",
+    "heroku-postbuild": "npm run install_dependencies && npm run build_frontend"
   },
   "author": "Hardik_Mistry",
   "license": "ISC",
@@ -25,5 +25,8 @@
     "nodemon": "^2.0.16",
     "socket.io": "^4.5.0",
     "socketio-file-upload": "^0.7.3"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
