@@ -122,12 +122,12 @@ io.on("connection", (socket) => {
         const previosMessages = await Chats.find({ conversationBy: data })
           .limit(10)
           .sort();
+        console.log("previosMessages", previosMessages);
+        socket.emit("getPreviousMessages", previosMessages);
       }
     } catch (error) {
       console.log("error from join", error);
     }
-    console.log("previosMessages", previosMessages);
-    socket.emit("getPreviousMessages", previosMessages);
   });
   socket.on("message", async (data) => {
     console.log("message coming fron react", data);
