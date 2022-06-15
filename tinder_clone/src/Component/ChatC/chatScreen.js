@@ -22,7 +22,7 @@ const uploader = new siofu(socket);
 let newConversationID;
 let userID;
 const uploadFileToServer = (files, conversationId, userId) => {
-  console.log("files", files.length);
+  // console.log("files", files.length);
   if (files.length > 5) return;
   newConversationID = conversationId;
   userID = userId;
@@ -40,6 +40,10 @@ uploader.addEventListener("complete", (event) => {
   };
   socket.emit("image", imageDataForChats);
 });
+
+socket.on("error", (error) => {
+  console.log("error", error);
+});
 uploader.addEventListener("error", (error) => {
   console.log("Error: " + error);
 });
@@ -51,10 +55,10 @@ export default function ChatScreen() {
 
   const dispatch = useDispatch();
   const param = useLocation().state.data;
-  console.log("param", param);
+  // console.log("param", param);
   const [input, setInput] = useState("");
   const [messages, setMessage] = useState([]);
-  console.log("messages", messages);
+  // console.log("messages", messages);
   // console.log("previosMessages==", previosMessages);
   useEffect(() => {
     setMessage(previosMessages);
@@ -62,10 +66,10 @@ export default function ChatScreen() {
 
   useEffect(() => {
     // setMessage([...messages, previosMessages]);
-    console.log("hey i am loading...");
+    // console.log("hey i am loading...");
     setMessage([]);
     if (conversationId) {
-      console.log("conversationId", conversationId);
+      // console.log("conversationId", conversationId);
       socket.emit("join", conversationId);
     }
   }, [conversationId]);

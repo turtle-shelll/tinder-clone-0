@@ -22,12 +22,12 @@ function Login() {
   // };
 
   const onSuccess = (res) => {
-    console.log(
-      "success",
-      res.profileObj,
-      res.tokenId
-      // res.getAuthResponse().id_token
-    );
+    // console.log(
+    //   "success",
+    //   res.profileObj,
+    //   res.tokenId
+    //   // res.getAuthResponse().id_token
+    // );
     const tokenId = res.tokenId;
     dispatch(ONsuccessLogin(tokenId));
   };

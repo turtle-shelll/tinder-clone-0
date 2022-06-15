@@ -14,7 +14,7 @@ export const allUserInitialData = createAsyncThunk(
   async (arg, thunkApi) => {
     try {
       const { data } = await axios.get("/tinder/cards");
-      console.log("data from server==", data);
+      // console.log("data from server==", data);
       if (data.length >= 0) {
         thunkApi.dispatch(setAllUsers(data));
       }
@@ -28,14 +28,14 @@ export const ONsuccessLogin = createAsyncThunk(
   "user/ONsuccessLogin",
   async (tokenId, thunkApi) => {
     try {
-      console.log("thunkApi==", thunkApi);
+      // console.log("thunkApi==", thunkApi);
       // console.log("tokenId==", tokenId);
       const { data } = await axios.post("/GoogleLogin", { tokenId });
       if (data.success) {
         thunkApi.dispatch(login());
         thunkApi.dispatch(setProfileUser(data.user));
       }
-      console.log("Google user server==", data);
+      // console.log("Google user server==", data);
     } catch (error) {
       console.log("error from google Login==", error);
     }

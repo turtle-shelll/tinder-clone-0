@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const GoogleLogin = async (req, res) => {
   const { tokenId } = req.body;
-  console.log("data==", tokenId);
+  // console.log("data==", tokenId);
   if (!tokenId) {
     return res.status(404).json({
       success: false,
@@ -40,7 +40,7 @@ const GoogleLogin = async (req, res) => {
 
     // console.log("payLoad of gToken==", payload);
     const user = await User.create({ ...newUser });
-    console.log("new-user==", user);
+    // console.log("new-user==", user);
 
     const jwtToken = jwt.sign(
       { name: user.fname, id: user._id, email: user.email },
@@ -94,7 +94,7 @@ const GoogleLogin = async (req, res) => {
 const checkStatus = async (req, res, next) => {
   try {
     const token = req.params.token;
-    console.log("token", token);
+    // console.log("token", token);
     const payload = jwt.verify(token, "my_spacail_secret");
     if (!payload) {
       return res.status(401).json({

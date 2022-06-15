@@ -17,7 +17,7 @@ const saveConversation = async (req, res) => {
     const exist = await Conversation.findOne({
       members: { $all: conversationIDS },
     });
-    console.log("exist", exist);
+    // console.log("exist", exist);
     if (exist) {
       return res.status(200).json({
         success: true,
@@ -29,7 +29,7 @@ const saveConversation = async (req, res) => {
 
     /////or else create new conversation
     const conversation = await Conversation.create({ ...newConversation });
-    console.log("conversation has created successfully", conversation);
+    // console.log("conversation has created successfully", conversation);
     return res.status(200).json({
       success: true,
       message: "conversationIDS has created successfully",

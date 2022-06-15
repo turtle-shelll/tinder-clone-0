@@ -10,7 +10,7 @@ function Chats() {
   const dispatch = useDispatch();
   const { availableChatPeople } = useSelector((state) => state.root);
   // const [chats, setChats] = useState([]);
-  console.log("availableChatPeople==", availableChatPeople);
+  // console.log("availableChatPeople==", availableChatPeople);
   // useEffect(() => {});
   const saveConversation = async (conversationIDS) => {
     try {
@@ -19,7 +19,7 @@ function Chats() {
       });
       if (data.success) {
         dispatch(setConversationId(data.conversationid));
-        console.log("conversationIDS has created successfully", data);
+        // console.log("conversationIDS has created successfully", data);
       }
     } catch (error) {
       console.log("error from saveConversation", error);

@@ -10,9 +10,9 @@ const saveMessage = async (data, io) => {
       };
       return error;
     }
-    console.log("message from saveMessage", message);
+    // console.log("message from saveMessage", message);
     const NewMessage = await Message.create({ ...message });
-    console.log("NewMessage", NewMessage);
+    // console.log("NewMessage", NewMessage);
     return NewMessage;
   } catch (error) {
     console.log("error from saveMessage", error);
@@ -23,7 +23,7 @@ const saveImageMessage = async (data, io) => {
   const message = await data;
   try {
     const NewMessage = await Message.create({ ...message });
-    console.log("NewMessage", NewMessage);
+    // console.log("NewMessage", NewMessage);
     io.emit("onGetImage", NewMessage);
   } catch (err) {
     const error = {
@@ -67,7 +67,7 @@ const updateImage = async (imageData, imageID, io) => {
 
 const getAllMessages = async (req, res) => {
   const conversationID = req.params.conversationID;
-  console.log("conversationID: ", conversationID);
+  // console.log("conversationID: ", conversationID);
 
   const messages = await Message.find({ conversationID: conversationID });
 

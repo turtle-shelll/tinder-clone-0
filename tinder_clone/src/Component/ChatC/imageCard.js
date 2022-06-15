@@ -40,11 +40,11 @@ function ImageCard({
             <IconButton
               onClick={async () => {
                 handleDeleteImage(indexID);
-                console.log("imageID: ", imageID);
+                // console.log("imageID: ", imageID);
                 const reqData = await axios.delete(
                   `/deleteImage/${imageUrl}/${imageID}`
                 );
-                console.log("reqData deleteImage", reqData);
+                // console.log("reqData deleteImage", reqData);
               }}
             >
               <DeleteIcon />

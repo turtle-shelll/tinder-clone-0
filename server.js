@@ -10,6 +10,27 @@ const fs = require("fs");
 const app = express();
 const cors = require("cors"); // we need cors to make our server to be able to access from other domains
 
+// /////****** trying to scale node server with cluster modulw in nodejs ****************/
+const cluster = require("cluster");
+const numCPUs = require("os").cpus().length;
+// ///trying to compress the text base data when sending it to client side**************************/
+const compression = require("compression");
+app.use(
+  compression({
+    level: 6,
+    threshold: 0,
+    filter: (req, res) => {
+      if (req.headers["x-no-compression"]) {
+        // don't compress responses with this request header
+        return false;
+      }
+      return compression.filter(req, res);
+    },
+  })
+);
+// app.use(express.json({ extended: false }));
+app.disable("x-powered-by");
+app.disable("etag");
 const Chats = require("./DBmodels/chatDb_model");
 // const Conversations = require("./DBmodels/conversation_model");
 const PORT = process.env.PORT || 5000;
@@ -75,7 +96,7 @@ const uploader = new socketioFileUploader();
 //////////// below this all are web socket  which responce to the client**********
 
 io.on("connection", (socket) => {
-  console.log("new connection added", socket.id);
+  // console.log("new connection added", socket.id);
 
   // uploader.dir = path.join(__dirname, "public/uploads");
   uploader.dir = "uploads";
@@ -86,10 +107,7 @@ io.on("connection", (socket) => {
   //   event.file.clientDetail.filePath = event.file.name;
   // });
   uploader.on("complete", (event) => {
-    let x = 1;
     event.file.clientDetail.filePath = event.file.name;
-    x++;
-    console.log("on complate", x);
   });
 
   uploader.on("error", (event) => {
@@ -103,7 +121,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("image", (image) => {
-    console.log("image", image);
+    // console.log("image", image);
     if (image) {
       saveImageMessage(image, io);
       // io.emit("onGetImage", newImage);
@@ -116,13 +134,13 @@ io.on("connection", (socket) => {
     updateImage(imageData, imageID, io);
   });
   socket.on("join", async (data) => {
-    console.log("data from join", data);
+    // console.log("data from join", data);
     try {
       if (data) {
         const previosMessages = await Chats.find({ conversationBy: data })
           .limit(10)
           .sort();
-        console.log("previosMessages", previosMessages);
+        // console.log("previosMessages", previosMessages);
         socket.emit("getPreviousMessages", previosMessages);
       }
     } catch (error) {
@@ -130,7 +148,7 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("message", async (data) => {
-    console.log("message coming fron react", data);
+    // console.log("message coming fron react", data);
     if (data) {
       const newMessage = await saveMessage(data);
       io.emit("backToUser", newMessage);
@@ -162,7 +180,7 @@ const upload = multer({ storage: storage });
 //// this is for uploading images to server using multer as middleware  but it is not real time upload as
 ///   we are using socket.io for real time upload images
 app.post("/uploadImage", upload.single("testImage"), async (req, res) => {
-  console.log("req.file==", req.file);
+  // console.log("req.file==", req.file);
   const userId = req.body;
 
   try {
@@ -176,9 +194,9 @@ app.post("/uploadImage", upload.single("testImage"), async (req, res) => {
       fileSize: req.file.size,
       filePath: req.file.path,
     };
-    console.log("fileName: " + req.file.filename);
+    // console.log("fileName: " + req.file.filename);
     const image = await userPost.create({ ...newPost });
-    console.log("we are from the uploadImage route");
+    // console.log("we are from the uploadImage route");
     res.status(200).json({
       success: true,
       imageName: image.fileName,
@@ -195,7 +213,7 @@ app.post("/uploadImage", upload.single("testImage"), async (req, res) => {
 //// deleting image from the server
 app.delete("/deleteImage/:imageName/:imageID", async (req, res) => {
   const { imageName, imageID } = req.params;
-  console.log("delete req.query", imageName, " img_id", imageID);
+  // console.log("delete req.query", imageName, " img_id", imageID);
   if (!imageName) {
     return res.status(400).json({
       success: false,
@@ -204,7 +222,7 @@ app.delete("/deleteImage/:imageName/:imageID", async (req, res) => {
   }
   try {
     const deleteImage = await Chats.findOneAndDelete({ _id: imageID });
-    console.log("deleted_image", deleteImage);
+    // console.log("deleted_image", deleteImage);
     const image = await fs.unlinkSync(`./uploads/${imageName}`);
   } catch (error) {
     console.log("error from deleteImage", error);
@@ -217,7 +235,7 @@ app.use("/", userRouter);
 app.use("/", conversation);
 app.use("/", chatsRouter);
 if (process.env.NODE_ENV === "production") {
-  console.log("production");
+  // console.log("production");
   app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
@@ -225,13 +243,32 @@ if (process.env.NODE_ENV === "production") {
 }
 app.use((err, req, res, next) => {
   console.log("error from server endpoint", err);
+  socket.emit("error", err);
 });
 async function start() {
   try {
     await ConnectDB(process.env.MONGODB_URL);
-    server.listen(PORT, () => {
-      console.log(`server Is listening on http://localhost:${PORT}`);
-    });
+    // console.log("numCPUs", numCPUs);
+    if (cluster.isMaster) {
+      for (let i = 0; i < numCPUs + 2; i++) {
+        cluster.fork();
+      }
+      cluster.on("exit", (worker, code, signal) => {
+        console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
+        cluster.fork();
+      });
+    } else {
+      server.listen(PORT, () => {
+        console.log(
+          `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+        );
+      });
+    }
+    // server.listen(PORT, () => {
+    //   console.log(
+    //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+    //   );
+    // });
   } catch (error) {
     console.log("error from Connection making via Mongoose", error);
   }

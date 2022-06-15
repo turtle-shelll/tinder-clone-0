@@ -13,7 +13,7 @@ function Update_Image({ updateImage }) {
   useEffect(() => {
     setInput(updateImageData[0]?.caption);
   }, [updateImageData]);
-  console.log("data", updateImageData[0]?.caption);
+  // console.log("data", updateImageData[0]?.caption);
   const dispatch = useDispatch();
   const newImageData = {
     conversationBy: updateImageData[0].conversationBy,
