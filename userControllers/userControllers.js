@@ -1,5 +1,6 @@
 const { OAuth2Client } = require("google-auth-library");
 // const cookieParser = require("cookie-parser");
+const axios = require("axios");
 const User = require("../DBmodels/userModel");
 const jwt = require("jsonwebtoken");
 
@@ -42,18 +43,19 @@ const GoogleLogin = async (req, res) => {
     const user = await User.create({ ...newUser });
     // console.log("new-user==", user);
 
-    const jwtToken = jwt.sign(
-      { name: user.fname, id: user._id, email: user.email },
+    const jwtToken = await jwt.sign(
+      { id: user._id, email: user.email },
       "my_spacail_secret",
       { expiresIn: "3d" }
     );
     res.status(201).json({
       success: true,
-      data: user,
+      // data: user,
       token: jwtToken,
       user: user,
     });
   } catch (error) {
+    // find user if is error code is equal to duplicate error code///////
     if (error.code && error.code === 11000) {
       const user = await User.findOne({ email: newUser.email });
       if (!user) {
@@ -75,8 +77,8 @@ const GoogleLogin = async (req, res) => {
           success: false,
         });
       }
-      const jwtToken = jwt.sign(
-        { name: user.fname, id: user._id, email: user.email },
+      const jwtToken = await jwt.sign(
+        { id: user._id, email: user.email },
         "my_spacail_secret",
         { expiresIn: "3d" }
       );
@@ -88,6 +90,112 @@ const GoogleLogin = async (req, res) => {
         user: user,
       });
     }
+  }
+};
+
+const FacebookLogin = async (req, res) => {
+  const { FB_token } = req.body;
+  // console.log("its working fb route", FB_token);
+  if (!FB_token)
+    return res
+      .status(200)
+      .json({ success: false, message: "access token is not present" });
+
+  let newUser = {};
+  try {
+    const { data } = await axios.get(
+      `https://graph.facebook.com/v12.0/me?access_token=${FB_token}&fields=name,email,first_name,last_name,middle_name,name_format,picture,short_name&method=get&pretty=0&sdk=joey&suppress_http_code=1`
+    );
+    // console.log("data of fb user ==**", data);
+    if (!data)
+      return res
+        .status(200)
+        .json({ success: false, message: "access token is not valid" });
+
+    if (!data.email) {
+      // console.log("chaking data.email is present or not", data?.email_verified);
+      return res.status(200).json({
+        success: false,
+        message:
+          "the facebook account you are trying is not have  email please try with other acount",
+      });
+    }
+
+    newUser = {
+      fname: data.name,
+      email: data.email,
+      password: data.id,
+      emailVerified: data.email ? true : false,
+      profilePicture: data.picture.data.url,
+      userFrom: "facebook",
+    };
+    // console.log("newUser==", newUser);
+    const user = await User.create({ ...newUser });
+
+    const jwtToken = await jwt.sign(
+      { id: user._id, email: user.email },
+      "my_spacail_secret",
+      { expiresIn: "3d" }
+    );
+    return res.status(201).json({
+      success: true,
+      user: user,
+      token: jwtToken,
+      message: "login success",
+    });
+  } catch (error) {
+    if (error && error.code === 11000) {
+      // console.log("duplicate user is present", error);
+      const user = await User.findOne({ email: newUser.email });
+      // console.log("user==", user);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Invalid credantials" });
+      }
+      if (!user.emailVerified) {
+        return res.status(200).json({
+          success: false,
+          message:
+            "the email you are try to login is not verified. please verify your email before trying again.",
+        });
+      }
+      if (user.userFrom !== "facebook") {
+        return res.status(200).json({
+          success: false,
+          message: `the account you are trying to login is created by ${user.userFrom} login route.`,
+        });
+      }
+      const jwtToken = await jwt.sign(
+        { id: user._id, email: user.email },
+        "my_spacail_secret",
+        { expiresIn: "3d" }
+      );
+      return res.status(200).json({
+        success: true,
+        message: "go for profile.",
+        user: user,
+        token: jwtToken,
+      });
+    }
+    console.log("errorfrom FB_login==**", error);
+  }
+};
+const addToChat = async (req, res) => {
+  const { userID } = req.body;
+  if (!userID) {
+    return res
+      .status(200)
+      .json({ success: false, message: "userID does not exist" });
+  }
+  const userWith_inChating = await User.findOne({ _id: userID });
+  const availableChatPeople = await ChatPeople.find({
+    conversationIDS: userID,
+  });
+
+  try {
+  } catch (error) {
+    console.log("error from addToChat==", error);
   }
 };
 
@@ -103,7 +211,9 @@ const checkStatus = async (req, res, next) => {
           "the account you are trying to access is not authorized please login first",
       });
     }
-    res.status(200).json({ success: true, message: "continue your work" });
+    return res
+      .status(200)
+      .json({ success: true, message: "continue your work" });
   } catch (error) {
     console.log("err from check status", error);
     return res.status(200).json({
@@ -115,7 +225,15 @@ const checkStatus = async (req, res, next) => {
 
 const TinderUser = async (req, res) => {
   try {
-    const user = await User.find({});
+    const user = await await User.find(
+      {},
+      {
+        email: 1,
+        profilePicture: 1,
+        fname: 1,
+      }
+    );
+    console.log("user==", user);
     res.status(200).send(user);
   } catch (error) {
     console.log("errorfrom tinder/cards===", error);
@@ -123,4 +241,4 @@ const TinderUser = async (req, res) => {
   }
 };
 
-module.exports = { GoogleLogin, checkStatus, TinderUser };
+module.exports = { GoogleLogin, checkStatus, TinderUser, FacebookLogin };

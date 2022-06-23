@@ -4,14 +4,14 @@ import { Navigate } from "react-router-dom";
 // import Cookies from "js-cookie";
 
 const ProtectedRoute = ({ isAuthenticated, children }) => {
-  if (!isAuthenticated) {
+  if (isAuthenticated) {
     // console.log("go for login");
-    return <Navigate to={"/login"} />;
+    return children;
   }
   // if (isAuthenticated) {
   //     return <Navigate  to={'/profile'}/>
   // }
-  return children;
+  return <Navigate to={"/login"} />;
 };
 
 export default ProtectedRoute;

@@ -6,7 +6,12 @@ import ImageCard from "./imageCard";
 import "./chatscreen.css";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { useSelector, useDispatch } from "react-redux";
-import { setUpdateImageData, setPreviosMessages } from "../../storeSlice";
+import {
+  setUpdateImageData,
+  setPreviosMessages,
+  setInitialLoading,
+  setChats,
+} from "../../storeSlice";
 import UpdateImage from "./update_Image";
 import { MAIN_URL } from "../../axios"; // axiosInstance
 import socketio from "socket.io-client";
@@ -23,7 +28,7 @@ let newConversationID;
 let userID;
 const uploadFileToServer = (files, conversationId, userId) => {
   // console.log("files", files.length);
-  if (files.length > 5) return;
+  if (files.length > 10) return;
   newConversationID = conversationId;
   userID = userId;
   uploader.listenOnInput(document.getElementById("siofu"));
@@ -48,11 +53,21 @@ uploader.addEventListener("error", (error) => {
   console.log("Error: " + error);
 });
 
-export default function ChatScreen() {
-  const { user, conversationId, isOpen, previosMessages } = useSelector(
-    (state) => state.root
-  );
+let postImages = [];
+socket.on("onGetImage", async (data) => {
+  postImages.push(data);
+  // dispatch(setPreviosMessages([...messages, data]));
+});
 
+export default function ChatScreen() {
+  const {
+    user,
+    conversationId,
+    isOpen,
+    previosMessages,
+    initialLoading,
+    chats,
+  } = useSelector((state) => state.root);
   const dispatch = useDispatch();
   const param = useLocation().state.data;
   // console.log("param", param);
@@ -66,64 +81,64 @@ export default function ChatScreen() {
 
   useEffect(() => {
     // setMessage([...messages, previosMessages]);
-    // console.log("hey i am loading...");
     setMessage([]);
     if (conversationId) {
-      // console.log("conversationId", conversationId);
+      // const existingConversation = chats.find((chatPeople) => {
+      //   return chatPeople.conversationId === conversationId;
+      // });
+      // console.log("existingConversation", existingConversation);
+      // if (existingConversation) {
+      //   return setMessage(existingConversation.messages);
+      // }
+      // console.log("its still calling...");
       socket.emit("join", conversationId);
     }
   }, [conversationId]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
-
     const trm = input.trim();
-
-    if (trm === "") {
-      setInput("");
-      return;
-    }
-
+    if (trm === "") return setInput("");
     socket.emit("message", {
       message: { textMessage: trm },
       messageFrom: user._id,
       conversationBy: conversationId,
-    });
+    },socket.id);
     setInput("");
   };
+
   socket.on("getPreviousMessages", async (preMessages) => {
     // console.log("previous messages", preMessages);
-    const oldMessages = await preMessages;
-    dispatch(setPreviosMessages(oldMessages));
-    // setMessage([...messages, ...preMessages]);
+    // const oldMessages = await preMessages;
+    // dispatch(setChats({ conversationId, messages: oldMessages }));
+    // dispatch(setPreviosMessages(preMessages));
+    // console.log("chats==**", chats);
+
+    setMessage([...messages, ...preMessages]);
   });
   socket.on("backToUser", async (data) => {
-    // await setMessage([...messages, data]);
-    await dispatch(setPreviosMessages([...messages, data]));
-    // console.log("backToUser", data);
+    // dispatch(setPreviosMessages([...messages, data]));
+    // setPreviosMessages([...messages, data]);
+    setMessage([...messages, data]);
   });
 
-  socket.on("onGetImage", async (data) => {
-    const newData = await data;
-    dispatch(setPreviosMessages([...messages, newData]));
-  });
+  // socket.on("onGetImage", async (data) => {
+  //   // const newData = await data;
+  //   dispatch(setPreviosMessages([...messages, data]));
+  // });
 
-  useEffect(() => {
-    document.querySelector(".scrollToBottom").scrollIntoView();
-  }, [messages]);
-
-  const handleDeleteImage = (indexID) => {
-    const newMessages = messages.filter((message, index) => {
-      return messages.indexOf(message) !== indexID;
-    });
-    setMessage(newMessages);
+  const handlePostImage = async (newPostImages) => {
+    // dispatch(setPreviosMessages([...messages, ...newPostImages]));
+    // setPreviosMessages([...messages, ...newPostImages]);
+    setMessage([...messages, ...newPostImages]);
+    postImages = [];
   };
 
   const updateImage = (imageData, imageID) => {
     socket.emit("updateImage", imageData, imageID);
     const newMessages = messages.map((message, index) => {
       if (message._id === imageID) {
-        imageData._id = imageID;
+        // imageData._id = imageID;
         return (message = imageData);
       }
       return message;
@@ -136,6 +151,17 @@ export default function ChatScreen() {
     });
     dispatch(setUpdateImageData(newImageData));
   };
+
+  // handleDeleteImage and useEfect  are working good *******
+  const handleDeleteImage = (indexID) => {
+    const newMessages = messages.filter((message, index) => {
+      return messages.indexOf(message) !== indexID;
+    });
+    setMessage(newMessages);
+  };
+  useEffect(() => {
+    document.querySelector(".scrollToBottom").scrollIntoView();
+  }, [messages]);
   return (
     <div className="chat_screen">
       {isOpen && <UpdateImage updateImage={updateImage} />}
@@ -218,6 +244,9 @@ export default function ChatScreen() {
                 e.preventDefault();
 
                 uploadFileToServer(e.target.files, conversationId, user._id);
+                setTimeout(() => {
+                  handlePostImage(postImages);
+                }, 1500);
               }}
             />
             <input

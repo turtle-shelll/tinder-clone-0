@@ -24,19 +24,47 @@ export const allUserInitialData = createAsyncThunk(
   }
 );
 
+export const FB_login = createAsyncThunk(
+  "user/FB_login",
+  async (FB_token, thunkApi) => {
+    try {
+      const { data } = await axios.post("/FacebookLogin", { FB_token });
+      console.log("data from FB-login==", data.user.availableChatPeople);
+      if (data.success) {
+        thunkApi.dispatch(login());
+        thunkApi.dispatch(setProfileUser(data.user));
+        thunkApi.dispatch(allUserInitialData());
+        // thunkApi.dispatch(onRightswipe(data.user.availableChatPeople));
+      }
+      if (!data.success) {
+        // thunkApi.dispatch(logout());
+        thunkApi.dispatch(setErrorMessages(data.message));
+      }
+    } catch (error) {
+      thunkApi.dispatch(setErrorMessages(error.response.data.message));
+      console.log("error from FB_login:", error);
+    }
+  }
+);
+
 export const ONsuccessLogin = createAsyncThunk(
   "user/ONsuccessLogin",
   async (tokenId, thunkApi) => {
     try {
-      // console.log("thunkApi==", thunkApi);
-      // console.log("tokenId==", tokenId);
       const { data } = await axios.post("/GoogleLogin", { tokenId });
       if (data.success) {
-        thunkApi.dispatch(login());
-        thunkApi.dispatch(setProfileUser(data.user));
+        await thunkApi.dispatch(login());
+        await thunkApi.dispatch(setProfileUser(data.user));
+        thunkApi.dispatch(allUserInitialData());
+
+        // await thunkApi.dispatch(onRightswipe(data.user.availableChatPeople));
       }
-      // console.log("Google user server==", data);
+      if (!data.success) {
+        // thunkApi.dispatch(logout());
+        thunkApi.dispatch(setErrorMessages(data.message));
+      }
     } catch (error) {
+      thunkApi.dispatch(setErrorMessages(error.response.data.message));
       console.log("error from google Login==", error);
     }
   }
@@ -69,6 +97,8 @@ const initialChatPeople = [
 ];
 
 const initialState = {
+  initialLoading: true,
+  errorMessages: [],
   allUsers: [],
   isAuthenticated: false,
   user: {},
@@ -86,6 +116,12 @@ const userSlice = createSlice({
   name: "root",
   initialState,
   reducers: {
+    setInitialLoading: (state, action) => {
+      state.initialLoading = false;
+    },
+    setErrorMessages: (state, action) => {
+      state.errorMessages = action.payload;
+    },
     setUpdateImageData: (state, action) => {
       state.updateImageData = action.payload;
     },
@@ -103,6 +139,28 @@ const userSlice = createSlice({
       state.conversationId = action.payload;
     },
     onRightswipe: (state, action) => {
+      console.log("action.payload==", action.payload);
+
+      // if (Array.isArray(action.payload) && newChatPeopleLength > 0) {
+      //   newChatPeopleLength.map((newUserId) => {
+      //     const newChatPeople = state.availableChatPeople.find(
+      //       (user) => user._id === newUserId
+      //     );
+      //     state.availableChatPeople.push(newChatPeople);
+      //   });
+      // }
+      // const chatPeople = action.payload.forEach((userID) => {
+      //   const thisUser = state.allUsers.filter((user) => {
+      //     return user._id === userID;
+      //   });
+      //   console.log("thisUser: " + thisUser);
+      //   return thisUser;
+      // });
+      // const thisUser = state.allUsers.find((user) => {
+      //   return user._id === action.payload;
+      // });
+      // console.log("thisUser==", thisUser);
+      // state.availableChatPeople.push(...thisUser);
       const thisUser = state.allUsers.find((user) => {
         return user._id === action.payload;
       });
@@ -110,25 +168,36 @@ const userSlice = createSlice({
     },
     login: (state, action) => {
       state.isAuthenticated = true;
-      if (action) {
-        state.user = action.payload;
-      }
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = {};
     },
     setAllUsers: (state, action) => {
-      // const profileUser = state.user;
-      // console.log("action==", action);
-      // //////////////////////// check this ******************************************************
-      // const data = action.payload;
-      // console.log("data from get all users==", data);
-      const newAllUsers = action.payload.filter((profilePerson) => {
-        return profilePerson._id !== state.user._id;
+      const dataArray = action.payload;
+      const chatWithPeople = [];
+      const allUsers = [];
+      dataArray.forEach((User) => {
+        let alluser = [];
+        const availableUser = state.user.availableChatPeople;
+        if (availableUser.length > 0) {
+        availableUser.forEach((userID) => {
+          if (User._id === userID) {
+            chatWithPeople.push(User);
+          }
+          if (User._id !== state.user._id && User._id !== userID) {
+            alluser.push({ ...User });
+          }
+        });
+      }else{
+        if (User._id !== state.user._id) {
+          alluser.push({ ...User });
+        }
+      }
+        allUsers.push(...alluser);
       });
-      // console.log("newAllUsers==", newAllUsers);
-      state.allUsers = newAllUsers;
+      state.allUsers = allUsers;
+      state.availableChatPeople.push(...chatWithPeople);
     },
     setProfileUser: (state, action) => {
       state.user = action.payload;
@@ -139,7 +208,6 @@ const userSlice = createSlice({
   },
   extraReducers: {
     [allUserInitialData.pending]: (state, action) => {
-      //   state.allUsers = action.payload;
       state.isLoading = true;
     },
     ////todays work is complate this as soon as possible///////////
@@ -166,6 +234,9 @@ export const {
   openIt,
   closeIt,
   setUpdateImageData,
+  setErrorMessages,
+  setInitialLoading,
+  setAvailableChatPeople,
 } = userSlice.actions;
 
 export default userSlice.reducer;

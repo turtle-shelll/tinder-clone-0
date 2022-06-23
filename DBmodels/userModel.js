@@ -20,6 +20,9 @@ const userSchema = new mongoose.Schema(
     profilePicture: String,
     emailVerified: String,
     userFrom: String,
+    availableChatPeople: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "TinderUser" },
+    ],
   },
   { timestamps: true }
 );

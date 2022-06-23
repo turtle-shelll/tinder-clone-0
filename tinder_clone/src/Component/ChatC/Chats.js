@@ -9,9 +9,7 @@ import { setConversationId } from "../../storeSlice";
 function Chats() {
   const dispatch = useDispatch();
   const { availableChatPeople } = useSelector((state) => state.root);
-  // const [chats, setChats] = useState([]);
-  // console.log("availableChatPeople==", availableChatPeople);
-  // useEffect(() => {});
+
   const saveConversation = async (conversationIDS) => {
     try {
       const { data } = await axios.post("/make_conversation", {

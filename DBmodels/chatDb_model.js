@@ -4,6 +4,7 @@ const chatSchema = new mongoose.Schema(
   {
     conversationBy: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation",
       required: [true, "conversationBy is required"],
     },
     messageFrom: {

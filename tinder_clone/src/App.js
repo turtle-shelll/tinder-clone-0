@@ -4,11 +4,11 @@ import TinderCards from "./Component/Card/Card";
 import Footer from "./Component/FooterC/Footer";
 import Chats from "./Component/ChatC/Chats";
 import ChatScreen from "./Component/ChatC/chatScreen";
-import UpdateImage from "./Component/ChatC/update_Image";
+// import UpdateImage from "./Component/ChatC/update_Image";
 // import BottomNav from "./Component/bottomNav/BottomNav";
 
 // import Login from "./Component/loginC/Login";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Login from "./Component/loginC/Login";
 // import Glogin from "./Component/loginC/Glogin";
 import Logout from "./Component/loginC/Logout";
@@ -64,50 +64,63 @@ function App() {
     <div className="app">
       <Router>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <HomeElement />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/">
+            <Route
+              // path="/"
+              index={true}
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <HomeElement />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/chats"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <Chats />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/chats/:person"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <ChatScreen />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              // <ProtectedRoute isAuthenticated={isAuthenticated}>
-              //   <LoginPage />
-              // </ProtectedRoute>
-              <Redirector isAuthenticated={isAuthenticated}>
-                <LoginPage />
-              </Redirector>
-            }
-          />
-          <Route
-            path="/update_image/:Id"
-            element={
-              // <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <UpdateImage />
-              // </ProtectedRoute>
-            }
-          />
+            <Route
+              path="/chats"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <Chats />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/chats/:person"
+              element={
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <ChatScreen />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                // <ProtectedRoute isAuthenticated={isAuthenticated}>
+                //   <LoginPage />
+                // </ProtectedRoute>
+
+                <Redirector isAuthenticated={isAuthenticated}>
+                  <LoginPage />
+                </Redirector>
+              }
+            />
+            {/* <Route
+              path="/update_image/:Id"
+              element={
+                // <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <UpdateImage />
+                // </ProtectedRoute>
+              }
+            /> */}
+            <Route
+              path="*"
+              element={
+                <div>
+                  <h1>there is no path available with this route </h1>
+                  <Link to="/">Go to Home</Link>
+                </div>
+              }
+            />
+          </Route>
         </Routes>
       </Router>
     </div>

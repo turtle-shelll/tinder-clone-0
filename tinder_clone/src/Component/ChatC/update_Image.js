@@ -16,6 +16,7 @@ function Update_Image({ updateImage }) {
   // console.log("data", updateImageData[0]?.caption);
   const dispatch = useDispatch();
   const newImageData = {
+    _id: updateImageData[0]._id,
     conversationBy: updateImageData[0].conversationBy,
     messageFrom: updateImageData[0].messageFrom,
     message: updateImageData[0].message,

@@ -4,9 +4,11 @@ require("express-async-errors"); /// express error handler for catching error fr
 const express = require("express");
 const ConnectDB = require("./DB/ConnectDB");
 
+const fs = require("fs");
+const https = require("https");
 const path = require("path");
 const http = require("http");
-const fs = require("fs");
+
 const app = express();
 const cors = require("cors"); // we need cors to make our server to be able to access from other domains
 
@@ -51,12 +53,19 @@ const multer = require("multer");
 const userPost = require("./DBmodels/userPost");
 const socketioFileUploader = require("socketio-file-upload");
 app.use(cors());
-const server = http.createServer(app);
+// const server = https.createServer(app);
+const sslServer = https.createServer(
+  {
+    key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
+    cert: fs.readFileSync(path.join(__dirname, "certs", "cert.pem")),
+  },
+  app
+);
 
 //// dont need to use cookieParser becouse it we are using react so it cant requsting from our server so it can't
 //// work
 // app.use(cookieParser());
-const io = socketIO(server);
+const io = socketIO(sslServer);
 
 ///// here i am getting destructuring littel bit for socket.io were in this function we can pass data or socket
 /////// to our function**********
@@ -134,24 +143,26 @@ io.on("connection", (socket) => {
     updateImage(imageData, imageID, io);
   });
   socket.on("join", async (data) => {
-    // console.log("data from join", data);
+    console.log("data from join", data);
     try {
       if (data) {
         const previosMessages = await Chats.find({ conversationBy: data })
-          .limit(10)
-          .sort();
+          .limit(20)
+          .sort({ createdAt: -1 });
         // console.log("previosMessages", previosMessages);
-        socket.emit("getPreviousMessages", previosMessages);
+        const messages = previosMessages.sort();
+        socket.emit("getPreviousMessages", messages);
       }
     } catch (error) {
       console.log("error from join", error);
     }
   });
-  socket.on("message", async (data) => {
-    // console.log("message coming fron react", data);
+  socket.on("message", async (data,socketID) => {
+    console.log("message coming fron react", data,"&& socketID",socketID);
     if (data) {
       const newMessage = await saveMessage(data);
-      io.emit("backToUser", newMessage);
+      // io.emit("backToUser", newMessage);
+      socket.to().emit("backToUser", newMessage);
     }
   });
 });
@@ -235,6 +246,9 @@ app.use("/", userRouter);
 app.use("/", conversation);
 app.use("/", chatsRouter);
 if (process.env.NODE_ENV === "production") {
+  // app.get("/", (req, res) => {
+  //   res.send("Welcome server is lestening on ssl server.");
+  // });
   // console.log("production");
   app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
   app.get("*", (req, res) => {
@@ -243,27 +257,41 @@ if (process.env.NODE_ENV === "production") {
 }
 app.use((err, req, res, next) => {
   console.log("error from server endpoint", err);
-  socket.emit("error", err);
+  // socket.emit("error", err);
+  io.emit("error", err);
 });
 async function start() {
   try {
     await ConnectDB(process.env.MONGODB_URL);
     // console.log("numCPUs", numCPUs);
-    if (cluster.isMaster) {
-      for (let i = 0; i < numCPUs + 2; i++) {
-        cluster.fork();
-      }
-      cluster.on("exit", (worker, code, signal) => {
-        console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
-        cluster.fork();
+    // const sslServer = https.createServer(
+    //   {
+    //     key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
+    //     cert: fs.readFileSync(path.join(__dirname, "certs", "cert.pem")),
+    //   },
+    //   app
+    // );
+    // if (cluster.isMaster) {
+    //   for (let i = 0; i < numCPUs + 2; i++) {
+    //     cluster.fork();
+    //   }
+    //   cluster.on("exit", (worker, code, signal) => {
+    //     console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
+    //     cluster.fork();
+    //   });
+    // } else {
+      // server.listen(PORT, () => {
+      //   console.log(
+      //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+      //   );
+      // });
+    //   sslServer.listen(PORT, () => {
+    //     console.log(`Server is listening on port https://localhost:${PORT}...`);
+    //   });
+    // }
+    sslServer.listen(PORT, () => {
+        console.log(`Server is listening on port https://localhost:${PORT}...`);
       });
-    } else {
-      server.listen(PORT, () => {
-        console.log(
-          `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-        );
-      });
-    }
     // server.listen(PORT, () => {
     //   console.log(
     //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`

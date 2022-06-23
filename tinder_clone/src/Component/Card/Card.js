@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import TinderCard from "react-tinder-card";
 import "./card.css";
 import { useSelector, useDispatch } from "react-redux";
-import { allUserInitialData, onRightswipe } from "../../storeSlice";
+import { onRightswipe } from "../../storeSlice";
 // import axios from "../../axios";
 // import database from "./fbase";
 // import { collection, onSnapshot } from "firebase/firestore";
@@ -14,21 +14,13 @@ function TinderCards() {
   const [people, setPeople] = useState([]);
 
   useEffect(() => {
-    dispatch(allUserInitialData());
-  }, [dispatch]);
-  useEffect(() => {
     setPeople(allUsers);
   }, [allUsers]);
   const swiped = (direction, nameToDelete, personId) => {
-    // console.log("Removing===", nameToDelete);
-    // console.log("direction action===", direction);
-    // console.log("personId===", personId);
     if (direction === "right") {
       dispatch(onRightswipe(personId));
     }
   };
-  // setLastDirection(direction);
-  // };
 
   const outOfFrame = (name) => {
     console.log(name, "this person has removed");

@@ -6,7 +6,8 @@ const conversation = new Mongoose.Schema(
     members: {
       type: Array,
       required: true,
-      // index: true,
+      index: true,
+      ref: "TinderUser",
     },
   },
   { timestamps: true }
