@@ -99,11 +99,15 @@ export default function ChatScreen() {
     e.preventDefault();
     const trm = input.trim();
     if (trm === "") return setInput("");
-    socket.emit("message", {
-      message: { textMessage: trm },
-      messageFrom: user._id,
-      conversationBy: conversationId,
-    },socket.id);
+    socket.emit(
+      "message",
+      {
+        message: { textMessage: trm },
+        messageFrom: user._id,
+        conversationBy: conversationId,
+      },
+      socket.id
+    );
     setInput("");
   };
 
