@@ -273,7 +273,7 @@ async function start() {
     //   app
     // );
     if (cluster.isMaster) {
-      for (let i = 0; i < numCPUs + 2; i++) {
+      for (let i = 0; i < 2; i++) {
         cluster.fork();
       }
       cluster.on("exit", (worker, code, signal) => {
