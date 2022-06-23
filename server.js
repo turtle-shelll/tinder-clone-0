@@ -272,32 +272,32 @@ async function start() {
     //   },
     //   app
     // );
-    if (cluster.isMaster) {
-      for (let i = 0; i < 2; i++) {
-        cluster.fork();
-      }
-      cluster.on("exit", (worker, code, signal) => {
-        console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
-        cluster.fork();
-      });
-    } else {
-      server.listen(PORT, () => {
-        console.log(
-          `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-        );
-      });
-      // sslServer.listen(PORT, () => {
-      //   console.log(`Server is listening on port https://localhost:${PORT}...`);
-      // });
-    }
+    // if (cluster.isMaster) {
+    //   for (let i = 0; i < 2; i++) {
+    //     cluster.fork();
+    //   }
+    //   cluster.on("exit", (worker, code, signal) => {
+    //     console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
+    //     cluster.fork();
+    //   });
+    // } else {
+    //   server.listen(PORT, () => {
+    //     console.log(
+    //       `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+    //     );
+    //   });
+    // sslServer.listen(PORT, () => {
+    //   console.log(`Server is listening on port https://localhost:${PORT}...`);
+    // });
+    // }
     // sslServer.listen(PORT, () => {
     //     console.log(`Server is listening on port https://localhost:${PORT}...`);
     //   });
-    // server.listen(PORT, () => {
-    //   console.log(
-    //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-    //   );
-    // });
+    server.listen(PORT, () => {
+      console.log(
+        `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+      );
+    });
   } catch (error) {
     console.log("error from Connection making via Mongoose", error);
   }
