@@ -53,7 +53,7 @@ const multer = require("multer");
 const userPost = require("./DBmodels/userPost");
 const socketioFileUploader = require("socketio-file-upload");
 app.use(cors());
-const server = https.createServer(app);
+const server = http.createServer(app);
 // const sslServer = https.createServer(
 //   {
 //     key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
@@ -247,13 +247,13 @@ app.use("/", userRouter);
 app.use("/", conversation);
 app.use("/", chatsRouter);
 if (process.env.NODE_ENV === "production") {
-  // app.get("/", (req, res) => {
-  //   res.send("Welcome server is lestening on ssl server.");
-  // });
   // console.log("production");
   app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
+  });
+  app.get("/", (req, res) => {
+    res.send("Welcome server is lestening on ssl server.");
   });
 }
 app.use((err, req, res, next) => {
@@ -272,32 +272,32 @@ async function start() {
     //   },
     //   app
     // );
-    // if (cluster.isMaster) {
-    //   for (let i = 0; i < 2; i++) {
-    //     cluster.fork();
-    //   }
-    //   cluster.on("exit", (worker, code, signal) => {
-    //     console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
-    //     cluster.fork();
-    //   });
-    // } else {
-    //   server.listen(PORT, () => {
-    //     console.log(
-    //       `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-    //     );
-    //   });
-    // sslServer.listen(PORT, () => {
-    //   console.log(`Server is listening on port https://localhost:${PORT}...`);
-    // });
-    // }
+    if (cluster.isMaster) {
+      for (let i = 0; i < numCPUs + 2; i++) {
+        cluster.fork();
+      }
+      cluster.on("exit", (worker, code, signal) => {
+        console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
+        cluster.fork();
+      });
+    } else {
+      server.listen(PORT, () => {
+        console.log(
+          `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+        );
+      });
+      // sslServer.listen(PORT, () => {
+      //   console.log(`Server is listening on port https://localhost:${PORT}...`);
+      // });
+    }
     // sslServer.listen(PORT, () => {
     //     console.log(`Server is listening on port https://localhost:${PORT}...`);
     //   });
-    server.listen(PORT, () => {
-      console.log(
-        `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-      );
-    });
+    // server.listen(PORT, () => {
+    //   console.log(
+    //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+    //   );
+    // });
   } catch (error) {
     console.log("error from Connection making via Mongoose", error);
   }
