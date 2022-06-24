@@ -17,7 +17,7 @@ const saveConversation = async (req, res) => {
     const exist = await Conversation.findOne({
       members: { $all: conversationIDS },
     });
-    console.log("exist", exist);
+    // console.log("exist", exist);
     if (exist) {
       return res.status(200).json({
         success: true,
@@ -34,7 +34,7 @@ const saveConversation = async (req, res) => {
       { _id: reciaver },
       { $push: { availableChatPeople: sender } }
     );
-   await User.findOneAndUpdate(
+    await User.findOneAndUpdate(
       { _id: sender },
       { $push: { availableChatPeople: reciaver } }
     );

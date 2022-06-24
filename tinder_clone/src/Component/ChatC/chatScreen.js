@@ -13,13 +13,14 @@ import {
   setChats,
 } from "../../storeSlice";
 import UpdateImage from "./update_Image";
-import { MAIN_URL } from "../../axios"; // axiosInstance
-import socketio from "socket.io-client";
-const ENDPOINT = MAIN_URL;
-const socket = socketio(ENDPOINT, { transports: ["websocket"] });
-socket.on("connect", () => {
-  console.log("getting Connected");
-});
+// import { MAIN_URL } from "../../axios"; // axiosInstance
+// import socketio from "socket.io-client";
+// const socket = socketio(MAIN_URL, { transports: ["websocket"] });
+// socket.on("connect", () => {
+//   console.log("getting Connected", socket.id);
+//   socket.emit("connection", );
+// });
+import { socket } from "../../storeSlice";
 
 const siofu = require("socketio-file-upload");
 const uploader = new siofu(socket);
@@ -27,7 +28,6 @@ const uploader = new siofu(socket);
 let newConversationID;
 let userID;
 const uploadFileToServer = (files, conversationId, userId) => {
-  // console.log("files", files.length);
   if (files.length > 10) return;
   newConversationID = conversationId;
   userID = userId;
@@ -35,7 +35,6 @@ const uploadFileToServer = (files, conversationId, userId) => {
 };
 
 uploader.addEventListener("complete", (event) => {
-  // console.log("complete");
   const imageDataForChats = {
     conversationBy: newConversationID,
     messageFrom: userID,
@@ -56,8 +55,11 @@ uploader.addEventListener("error", (error) => {
 let postImages = [];
 socket.on("onGetImage", async (data) => {
   postImages.push(data);
-  // dispatch(setPreviosMessages([...messages, data]));
 });
+// socket.on("disconnect", () => {
+//   socket.emit("disconnected", socket.id);
+//   socket.disconnect();
+// });
 
 export default function ChatScreen() {
   const {
@@ -70,33 +72,24 @@ export default function ChatScreen() {
   } = useSelector((state) => state.root);
   const dispatch = useDispatch();
   const param = useLocation().state.data;
-  // console.log("param", param);
+  console.log("params--params", param);
   const [input, setInput] = useState("");
   const [messages, setMessage] = useState([]);
-  // console.log("messages", messages);
-  // console.log("previosMessages==", previosMessages);
+
   useEffect(() => {
     setMessage(previosMessages);
   }, [previosMessages]);
 
   useEffect(() => {
-    // setMessage([...messages, previosMessages]);
     setMessage([]);
     if (conversationId) {
-      // const existingConversation = chats.find((chatPeople) => {
-      //   return chatPeople.conversationId === conversationId;
-      // });
-      // console.log("existingConversation", existingConversation);
-      // if (existingConversation) {
-      //   return setMessage(existingConversation.messages);
-      // }
-      // console.log("its still calling...");
       socket.emit("join", conversationId);
     }
   }, [conversationId]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
+
     const trm = input.trim();
     if (trm === "") return setInput("");
     socket.emit(
@@ -106,23 +99,15 @@ export default function ChatScreen() {
         messageFrom: user._id,
         conversationBy: conversationId,
       },
-      socket.id
+      param.otherUser._id
     );
     setInput("");
   };
 
   socket.on("getPreviousMessages", async (preMessages) => {
-    // console.log("previous messages", preMessages);
-    // const oldMessages = await preMessages;
-    // dispatch(setChats({ conversationId, messages: oldMessages }));
-    // dispatch(setPreviosMessages(preMessages));
-    // console.log("chats==**", chats);
-
     setMessage([...messages, ...preMessages]);
   });
   socket.on("backToUser", async (data) => {
-    // dispatch(setPreviosMessages([...messages, data]));
-    // setPreviosMessages([...messages, data]);
     setMessage([...messages, data]);
   });
 
@@ -130,10 +115,11 @@ export default function ChatScreen() {
   //   // const newData = await data;
   //   dispatch(setPreviosMessages([...messages, data]));
   // });
-
+  socket.on("disconnect", () => {
+    socket.emit("disconnected", user._id);
+    socket.disconnect();
+  });
   const handlePostImage = async (newPostImages) => {
-    // dispatch(setPreviosMessages([...messages, ...newPostImages]));
-    // setPreviosMessages([...messages, ...newPostImages]);
     setMessage([...messages, ...newPostImages]);
     postImages = [];
   };
@@ -142,7 +128,6 @@ export default function ChatScreen() {
     socket.emit("updateImage", imageData, imageID);
     const newMessages = messages.map((message, index) => {
       if (message._id === imageID) {
-        // imageData._id = imageID;
         return (message = imageData);
       }
       return message;

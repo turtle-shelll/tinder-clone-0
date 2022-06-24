@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { axios } from "./axios";
+import { axios, MAIN_URL } from "./axios";
 // import axios from "axios";
 
 ///// socket configuration   `http://localhost:5000/`
@@ -8,7 +8,12 @@ import { axios } from "./axios";
 // const socket = socketio(ENDPOINT, { transports: ["websocket"] });
 // const siofu = require("socketio-file-upload");
 // const uploader = new siofu(socket);
-
+import socketio from "socket.io-client";
+export const socket = socketio(MAIN_URL, { transports: ["websocket"] });
+// socket.on("connect", () => {
+//   console.log("getting Connected", socket.id);
+//   socket.emit("connection");
+// });
 export const allUserInitialData = createAsyncThunk(
   "userSlice/allUserInitialData",
   async (arg, thunkApi) => {
@@ -181,19 +186,19 @@ const userSlice = createSlice({
         let alluser = [];
         const availableUser = state.user.availableChatPeople;
         if (availableUser.length > 0) {
-        availableUser.forEach((userID) => {
-          if (User._id === userID) {
-            chatWithPeople.push(User);
-          }
-          if (User._id !== state.user._id && User._id !== userID) {
+          availableUser.forEach((userID) => {
+            if (User._id === userID) {
+              chatWithPeople.push(User);
+            }
+            if (User._id !== state.user._id && User._id !== userID) {
+              alluser.push({ ...User });
+            }
+          });
+        } else {
+          if (User._id !== state.user._id) {
             alluser.push({ ...User });
           }
-        });
-      }else{
-        if (User._id !== state.user._id) {
-          alluser.push({ ...User });
         }
-      }
         allUsers.push(...alluser);
       });
       state.allUsers = allUsers;
@@ -201,6 +206,7 @@ const userSlice = createSlice({
     },
     setProfileUser: (state, action) => {
       state.user = action.payload;
+      socket.emit("addUserToSocket", action.payload._id);
     },
     setChats: (state, action) => {
       state.chats.push(action.payload);

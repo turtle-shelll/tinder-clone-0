@@ -188,12 +188,11 @@ const addToChat = async (req, res) => {
       .status(200)
       .json({ success: false, message: "userID does not exist" });
   }
-  const userWith_inChating = await User.findOne({ _id: userID });
-  const availableChatPeople = await ChatPeople.find({
-    conversationIDS: userID,
-  });
-
   try {
+    const userWith_inChating = await User.findOne({ _id: userID });
+    const availableChatPeople = await ChatPeople.find({
+      conversationIDS: userID,
+    });
   } catch (error) {
     console.log("error from addToChat==", error);
   }
@@ -233,7 +232,7 @@ const TinderUser = async (req, res) => {
         fname: 1,
       }
     );
-    console.log("user==", user);
+    // console.log("user==", user);
     res.status(200).send(user);
   } catch (error) {
     console.log("errorfrom tinder/cards===", error);

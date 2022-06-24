@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PhotoCameraFrontIcon from "@mui/icons-material/PhotoCameraFront";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
+// import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import "./Single.css";
 
 const SingleChat = ({
@@ -62,9 +62,6 @@ const SingleChat = ({
         <>
           <IconButton>
             <PhotoCameraFrontIcon />
-          </IconButton>
-          <IconButton>
-            <CameraAltIcon />
           </IconButton>
         </>
       ) : (

@@ -31,7 +31,7 @@ const saveImageMessage = async (data, io) => {
       message: "there is an error in saveImageMessage",
     };
     io.emit("onGetImage", error);
-    console.log("error from saveImageMessage", err);
+    // console.log("error from saveImageMessage", err);
   }
 };
 

@@ -52,21 +52,21 @@ const socketIO = require("socket.io");
 const multer = require("multer");
 const userPost = require("./DBmodels/userPost");
 const socketioFileUploader = require("socketio-file-upload");
-app.use(cors());
-const server = http.createServer(app);
-// const sslServer = https.createServer(
-//   {
-//     key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
-//     cert: fs.readFileSync(path.join(__dirname, "certs", "cert.pem")),
-//   },
-//   app
-// );
+app.use(cors({ origin: "http://localhost:3000" }));
+// const server = http.createServer(app);
+const sslServer = https.createServer(
+  {
+    key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
+    cert: fs.readFileSync(path.join(__dirname, "certs", "cert.pem")),
+  },
+  app
+);
 
 //// dont need to use cookieParser becouse it we are using react so it cant requsting from our server so it can't
 //// work
 // app.use(cookieParser());
-// const io = socketIO(sslServer);
-const io = socketIO(server);
+const io = socketIO(sslServer);
+// const io = socketIO(server);
 
 ///// here i am getting destructuring littel bit for socket.io were in this function we can pass data or socket
 /////// to our function**********
@@ -104,37 +104,33 @@ const uploader = new socketioFileUploader();
 ///////////////
 
 //////////// below this all are web socket  which responce to the client**********
-
+global.onlineUser = new Map();
 io.on("connection", (socket) => {
   // console.log("new connection added", socket.id);
-
-  // uploader.dir = path.join(__dirname, "public/uploads");
   uploader.dir = "uploads";
 
   uploader.listen(socket);
-  // uploader.on("saved", (event) => {
-  //   console.log("data from socket");
-  //   event.file.clientDetail.filePath = event.file.name;
-  // });
   uploader.on("complete", (event) => {
     event.file.clientDetail.filePath = event.file.name;
   });
-
   uploader.on("error", (event) => {
     console.log("error from socket", event);
   });
 
-  ///// bilow here when we arre using socket we are getting responce from client side socket
+  ///// bilow here when we are using socket we are getting responce from client side socket
   ///// and when we want to send back we are using io.emit to give responce to client side
-  socket.on("connect", () => {
-    console.log("conneccted", socket.id);
+  socket.on("addUserToSocket", (userID) => {
+    global.chatSocket = socket;
+    console.log("conneccted===", userID, `==${socket.id}`);
+    onlineUser.set(userID, socket.id);
   });
-
+  socket.on("disconnected", (data) => {
+    console.log("disconnected--disconnected-disconnected", data);
+    onlineUser.delete(data);
+  });
   socket.on("image", (image) => {
-    // console.log("image", image);
     if (image) {
       saveImageMessage(image, io);
-      // io.emit("onGetImage", newImage);
     }
   });
 
@@ -143,7 +139,9 @@ io.on("connection", (socket) => {
     // console.log("imageID", imageID);
     updateImage(imageData, imageID, io);
   });
+
   socket.on("join", async (data) => {
+    console.log("available-Users are", onlineUser);
     console.log("data from join", data);
     try {
       if (data) {
@@ -158,12 +156,16 @@ io.on("connection", (socket) => {
       console.log("error from join", error);
     }
   });
-  socket.on("message", async (data, socketID) => {
-    console.log("message coming fron react", data, "&& socketID", socketID);
+  socket.on("message", async (data, receiversID) => {
+    // console.log("message coming fron react", data, "&& socketID", socket.id);
     if (data) {
       const newMessage = await saveMessage(data);
-      // io.emit("backToUser", newMessage);
-      socket.to().emit("backToUser", newMessage);
+      socket.emit("backToUser", newMessage);
+      const sentTOuser = onlineUser.get(receiversID);
+      console.log("sentTOuser", sentTOuser);
+      if (sentTOuser) {
+        socket.to(sentTOuser).emit("backToUser", newMessage);
+      }
     }
   });
 });
@@ -272,27 +274,27 @@ async function start() {
     //   },
     //   app
     // );
-    if (cluster.isMaster) {
-      for (let i = 0; i < numCPUs + 2; i++) {
-        cluster.fork();
-      }
-      cluster.on("exit", (worker, code, signal) => {
-        console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
-        cluster.fork();
-      });
-    } else {
-      server.listen(PORT, () => {
-        console.log(
-          `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-        );
-      });
-      // sslServer.listen(PORT, () => {
-      //   console.log(`Server is listening on port https://localhost:${PORT}...`);
-      // });
-    }
-    // sslServer.listen(PORT, () => {
+    // if (cluster.isMaster) {
+    //   for (let i = 0; i < 1; i++) {
+    //     cluster.fork();
+    //   }
+    //   cluster.on("exit", (worker, code, signal) => {
+    //     console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
+    //     cluster.fork();
+    //   });
+    // } else {
+    //   // server.listen(PORT, () => {
+    //   //   console.log(
+    //   //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+    //   //   );
+    //   // });
+    //   sslServer.listen(PORT, () => {
     //     console.log(`Server is listening on port https://localhost:${PORT}...`);
     //   });
+    // }
+    sslServer.listen(PORT, () => {
+      console.log(`Server is listening on port https://localhost:${PORT}...`);
+    });
     // server.listen(PORT, () => {
     //   console.log(
     //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
