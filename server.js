@@ -52,7 +52,8 @@ const socketIO = require("socket.io");
 const multer = require("multer");
 const userPost = require("./DBmodels/userPost");
 const socketioFileUploader = require("socketio-file-upload");
-app.use(cors({ origin: "http://localhost:3000" }));
+// app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors());
 const server = http.createServer(app);
 // const sslServer = https.createServer(
 //   {
@@ -289,7 +290,7 @@ async function start() {
     //   app
     // );
     if (cluster.isMaster) {
-      for (let i = 0; i < numCPUs + 2; i++) {
+      for (let i = 0; i < 4; i++) {
         cluster.fork();
       }
       cluster.on("exit", (worker, code, signal) => {

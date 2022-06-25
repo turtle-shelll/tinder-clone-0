@@ -24,7 +24,7 @@ let newConversationID;
 let userID;
 let receiversID;
 const uploadFileToServer = (files, conversationId, userId, receivers) => {
-  if (files.length > 10) return;
+  if (files.length > 6) return;
   newConversationID = conversationId;
   userID = userId;
   receiversID = receivers;
@@ -79,8 +79,6 @@ export default function ChatScreen() {
   }, [conversationId]);
 
   const sendMessage = async (e) => {
-    console.log("event==**", e);
-
     if (e.key === "Enter" || e.type === "click") {
       const trm = input.trim();
       if (trm === "") return setInput("");
@@ -120,7 +118,6 @@ export default function ChatScreen() {
         return msg;
       }
     });
-    console.log("message", message);
     setMessage(message);
   });
 
@@ -236,8 +233,6 @@ export default function ChatScreen() {
             </div>
           );
         })}
-        {/* <ImageCard /> */}
-        {/* bottom chat send box */}
         <div className="bottomCat_container">
           <div className="input_div">
             <input
