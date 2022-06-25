@@ -53,20 +53,20 @@ const multer = require("multer");
 const userPost = require("./DBmodels/userPost");
 const socketioFileUploader = require("socketio-file-upload");
 app.use(cors({ origin: "http://localhost:3000" }));
-// const server = http.createServer(app);
-const sslServer = https.createServer(
-  {
-    key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
-    cert: fs.readFileSync(path.join(__dirname, "certs", "cert.pem")),
-  },
-  app
-);
+const server = http.createServer(app);
+// const sslServer = https.createServer(
+//   {
+//     key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
+//     cert: fs.readFileSync(path.join(__dirname, "certs", "cert.pem")),
+//   },
+//   app
+// );
 
 //// dont need to use cookieParser becouse it we are using react so it cant requsting from our server so it can't
 //// work
 // app.use(cookieParser());
-const io = socketIO(sslServer);
-// const io = socketIO(server);
+// const io = socketIO(sslServer);
+const io = socketIO(server);
 
 ///// here i am getting destructuring littel bit for socket.io were in this function we can pass data or socket
 /////// to our function**********
@@ -128,16 +128,31 @@ io.on("connection", (socket) => {
     console.log("disconnected--disconnected-disconnected", data);
     onlineUser.delete(data);
   });
-  socket.on("image", (image) => {
+
+  socket.on("image", async (image, receiversID) => {
     if (image) {
-      saveImageMessage(image, io);
+      const newMessage = await saveImageMessage(image, socket);
+      // const sentTOuser = onlineUser.get(receiversID);
+      // if (sentTOuser) {
+      //   socket.to(sentTOuser).emit("backToUser", newMessage);
+      // }
+    }
+  });
+  socket.on("postImage", async (data, receiversID) => {
+    const sentTOuser = onlineUser.get(receiversID);
+    if (sentTOuser) {
+      socket.to(sentTOuser).emit("savedImages", data);
     }
   });
 
-  socket.on("updateImage", (imageData, imageID) => {
+  socket.on("updateImage", async (imageData, imageID, receiversID) => {
     // console.log("from update imageData", imageData);
     // console.log("imageID", imageID);
-    updateImage(imageData, imageID, io);
+    const updatedData = await updateImage(imageData, imageID, socket);
+    const sentTOuser = onlineUser.get(receiversID);
+    if (sentTOuser) {
+      socket.to(sentTOuser).emit("reciavedImage", updatedData, imageID);
+    }
   });
 
   socket.on("join", async (data) => {
@@ -162,7 +177,6 @@ io.on("connection", (socket) => {
       const newMessage = await saveMessage(data);
       socket.emit("backToUser", newMessage);
       const sentTOuser = onlineUser.get(receiversID);
-      console.log("sentTOuser", sentTOuser);
       if (sentTOuser) {
         socket.to(sentTOuser).emit("backToUser", newMessage);
       }
@@ -274,27 +288,27 @@ async function start() {
     //   },
     //   app
     // );
-    // if (cluster.isMaster) {
-    //   for (let i = 0; i < 1; i++) {
-    //     cluster.fork();
-    //   }
-    //   cluster.on("exit", (worker, code, signal) => {
-    //     console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
-    //     cluster.fork();
-    //   });
-    // } else {
-    //   // server.listen(PORT, () => {
-    //   //   console.log(
-    //   //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-    //   //   );
-    //   // });
-    //   sslServer.listen(PORT, () => {
-    //     console.log(`Server is listening on port https://localhost:${PORT}...`);
-    //   });
-    // }
-    sslServer.listen(PORT, () => {
-      console.log(`Server is listening on port https://localhost:${PORT}...`);
-    });
+    if (cluster.isMaster) {
+      for (let i = 0; i < numCPUs + 2; i++) {
+        cluster.fork();
+      }
+      cluster.on("exit", (worker, code, signal) => {
+        console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
+        cluster.fork();
+      });
+    } else {
+      server.listen(PORT, () => {
+        console.log(
+          `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+        );
+      });
+      // sslServer.listen(PORT, () => {
+      //   console.log(`Server is listening on port https://localhost:${PORT}...`);
+      // });
+    }
+    // sslServer.listen(PORT, () => {
+    //   console.log(`Server is listening on port https://localhost:${PORT}...`);
+    // });
     // server.listen(PORT, () => {
     //   console.log(
     //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`

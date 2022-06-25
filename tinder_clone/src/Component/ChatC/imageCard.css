@@ -5,7 +5,8 @@
     overflow: hidden;
     border-radius: 15px;
     margin: 10px;
-
+    border: 1px solid lightgray;
+    box-sizing: border-box;
     /* background-color: green; */
 }
 
@@ -15,6 +16,7 @@
     /* background-size: cover; */
     background-position: center;
     /* transition: transform .2s ease-in-out; */
+    background-color: lightgray;
 }
 
 .image_container img {

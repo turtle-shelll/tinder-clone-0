@@ -6,12 +6,7 @@ import ImageCard from "./imageCard";
 import "./chatscreen.css";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  setUpdateImageData,
-  setPreviosMessages,
-  setInitialLoading,
-  setChats,
-} from "../../storeSlice";
+import { setUpdateImageData } from "../../storeSlice";
 import UpdateImage from "./update_Image";
 // import { MAIN_URL } from "../../axios"; // axiosInstance
 // import socketio from "socket.io-client";
@@ -27,10 +22,12 @@ const uploader = new siofu(socket);
 
 let newConversationID;
 let userID;
-const uploadFileToServer = (files, conversationId, userId) => {
+let receiversID;
+const uploadFileToServer = (files, conversationId, userId, receivers) => {
   if (files.length > 10) return;
   newConversationID = conversationId;
   userID = userId;
+  receiversID = receivers;
   uploader.listenOnInput(document.getElementById("siofu"));
 };
 
@@ -42,7 +39,7 @@ uploader.addEventListener("complete", (event) => {
       imageUrl: event.detail.filePath,
     },
   };
-  socket.emit("image", imageDataForChats);
+  socket.emit("image", imageDataForChats, receiversID);
 });
 
 socket.on("error", (error) => {
@@ -62,17 +59,11 @@ socket.on("onGetImage", async (data) => {
 // });
 
 export default function ChatScreen() {
-  const {
-    user,
-    conversationId,
-    isOpen,
-    previosMessages,
-    initialLoading,
-    chats,
-  } = useSelector((state) => state.root);
+  const { user, conversationId, isOpen, previosMessages } = useSelector(
+    (state) => state.root
+  );
   const dispatch = useDispatch();
   const param = useLocation().state.data;
-  console.log("params--params", param);
   const [input, setInput] = useState("");
   const [messages, setMessage] = useState([]);
 
@@ -88,27 +79,49 @@ export default function ChatScreen() {
   }, [conversationId]);
 
   const sendMessage = async (e) => {
-    e.preventDefault();
+    console.log("event==**", e);
 
-    const trm = input.trim();
-    if (trm === "") return setInput("");
-    socket.emit(
-      "message",
-      {
-        message: { textMessage: trm },
-        messageFrom: user._id,
-        conversationBy: conversationId,
-      },
-      param.otherUser._id
-    );
-    setInput("");
+    if (e.key === "Enter" || e.type === "click") {
+      const trm = input.trim();
+      if (trm === "") return setInput("");
+      socket.emit(
+        "message",
+        {
+          message: { textMessage: trm },
+          messageFrom: user._id,
+          conversationBy: conversationId,
+        },
+        param.otherUser._id
+      );
+      setInput("");
+    }
   };
+
+  useEffect(() => {
+    window.addEventListener("keydown", sendMessage);
+    return () => window.removeEventListener("keydown", sendMessage);
+  }, [input]);
 
   socket.on("getPreviousMessages", async (preMessages) => {
     setMessage([...messages, ...preMessages]);
   });
   socket.on("backToUser", async (data) => {
     setMessage([...messages, data]);
+  });
+  socket.on("savedImages", async (data) => {
+    setMessage([...messages, ...data]);
+  });
+
+  socket.on("reciavedImage", (reciavedImageData, imageID) => {
+    const message = messages.map((msg, index) => {
+      if (msg._id === imageID) {
+        return reciavedImageData;
+      } else {
+        return msg;
+      }
+    });
+    console.log("message", message);
+    setMessage(message);
   });
 
   // socket.on("onGetImage", async (data) => {
@@ -119,13 +132,16 @@ export default function ChatScreen() {
     socket.emit("disconnected", user._id);
     socket.disconnect();
   });
+  // /////function area of chat-screen starts here********************************
+
   const handlePostImage = async (newPostImages) => {
     setMessage([...messages, ...newPostImages]);
+    socket.emit("postImage", newPostImages, param.otherUser._id);
     postImages = [];
   };
 
   const updateImage = (imageData, imageID) => {
-    socket.emit("updateImage", imageData, imageID);
+    socket.emit("updateImage", imageData, imageID, param.otherUser._id);
     const newMessages = messages.map((message, index) => {
       if (message._id === imageID) {
         return (message = imageData);
@@ -187,6 +203,7 @@ export default function ChatScreen() {
                         imageName={message?.message?.imageUrl}
                         // handleDeleteImage={handleDeleteImage}
                         displayImage={false}
+                        caption={message?.caption}
                       />
                     </div>
                   ) : (
@@ -232,7 +249,12 @@ export default function ChatScreen() {
               onInput={(e) => {
                 e.preventDefault();
 
-                uploadFileToServer(e.target.files, conversationId, user._id);
+                uploadFileToServer(
+                  e.target.files,
+                  conversationId,
+                  user._id,
+                  param.otherUser._id
+                );
                 setTimeout(() => {
                   handlePostImage(postImages);
                 }, 1500);
@@ -245,7 +267,7 @@ export default function ChatScreen() {
               value={input}
               className="inp"
               // onInput={}
-              onInput={(e) => {
+              onChange={(e) => {
                 setInput(e.target.value);
               }}
             />

@@ -1,6 +1,6 @@
 const Message = require("../DBmodels/chatDb_model");
 
-const saveMessage = async (data, io) => {
+const saveMessage = async (data, socket) => {
   const message = data;
   try {
     if (!message) {
@@ -19,30 +19,31 @@ const saveMessage = async (data, io) => {
   }
 };
 
-const saveImageMessage = async (data, io) => {
-  const message = await data;
+const saveImageMessage = async (data, socket) => {
+  const message = data;
   try {
     const NewMessage = await Message.create({ ...message });
     // console.log("NewMessage", NewMessage);
-    io.emit("onGetImage", NewMessage);
+    socket.emit("onGetImage", NewMessage);
+    return NewMessage;
   } catch (err) {
     const error = {
       success: false,
       message: "there is an error in saveImageMessage",
     };
-    io.emit("onGetImage", error);
+    socket.emit("onGetImage", error);
     // console.log("error from saveImageMessage", err);
   }
 };
 
-const updateImage = async (imageData, imageID, io) => {
+const updateImage = async (imageData, imageID, socket) => {
   try {
     if (!imageData) {
       error = {
         success: false,
         message: "there is no newImageData available",
       };
-      io.emit("newImageData", error);
+      socket.emit("newImageData", error);
       return;
     }
     // console.log("imageData==******", imageData);
@@ -52,15 +53,15 @@ const updateImage = async (imageData, imageID, io) => {
       { new: true, runValidators: true, overwrite: true }
     );
     // console.log("newImageData ==**=", newImageData);
-    io.emit("newImageData", newImageData);
-    return;
+    socket.emit("newImageData", newImageData);
+    return newImageData;
   } catch (err) {
     console.log("error from updateImage", err);
     error = {
       success: false,
       message: "there is an error in updateImage",
     };
-    io.emit("newImageData", error);
+    socket.emit("newImageData", error);
     return;
   }
 };
