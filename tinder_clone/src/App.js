@@ -11,7 +11,7 @@ import ChatScreen from "./Component/ChatC/chatScreen";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Login from "./Component/loginC/Login";
 // import Glogin from "./Component/loginC/Glogin";
-import Logout from "./Component/loginC/Logout";
+// import Logout from "./Component/loginC/Logout";
 import { useEffect } from "react";
 import Redirector from "./Redirector";
 import ProtectedRoute from "./protectedRoute";
@@ -48,7 +48,7 @@ const LoginPage = () => {
       <div className="g-signin">
         {/* <Login /> */}
         {/* <Glogin /> */}
-        <Logout />
+        {/* <Logout /> */}
         <Login />
       </div>
       {/* <GoogleApiProvider clientId={clientId}> */}
@@ -74,7 +74,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/chats"
               element={
@@ -94,23 +93,11 @@ function App() {
             <Route
               path="/login"
               element={
-                // <ProtectedRoute isAuthenticated={isAuthenticated}>
-                //   <LoginPage />
-                // </ProtectedRoute>
-
                 <Redirector isAuthenticated={isAuthenticated}>
                   <LoginPage />
                 </Redirector>
               }
             />
-            {/* <Route
-              path="/update_image/:Id"
-              element={
-                // <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <UpdateImage />
-                // </ProtectedRoute>
-              }
-            /> */}
             <Route
               path="*"
               element={

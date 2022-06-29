@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 
 const GoogleLogin = async (req, res) => {
   const { tokenId } = req.body;
-  // console.log("data==", tokenId);
+  console.log("data==", tokenId);
   if (!tokenId) {
     return res.status(404).json({
       success: false,

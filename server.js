@@ -79,11 +79,6 @@ const {
 
 ///   this bilow middleware is for sending images as static file to client side
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-// app.use("/css", express.static("tinder_clone/build/static/css"));
-// app.use("/js", express.static("tinder_clone/build/static/js"));
-// app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
-// app.use(express.static("tinder_clone/build"));
-// app.use(express.static("tinder_clone/build/index.html"));
 //// or we can use this below requste responce handeler
 
 // app.get("/uploads/:image", async (req, res) => {
@@ -119,7 +114,7 @@ io.on("connection", (socket) => {
   });
 
   ///// bilow here when we are using socket we are getting responce from client side socket
-  ///// and when we want to send back we are using io.emit to give responce to client side
+  ///// and when we want to send back we are using socket.emit to give responce to client side
   socket.on("addUserToSocket", (userID) => {
     global.chatSocket = socket;
     console.log("conneccted===", userID, `==${socket.id}`);
@@ -188,12 +183,6 @@ io.on("connection", (socket) => {
 ///////
 
 ////  below are all http handlers routes
-// app.get("/", async (req, res) => {
-//   res.send("its Working express server");
-// });
-// app.get("/", function (req, res) {
-//   res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
-// });
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -209,12 +198,10 @@ const upload = multer({ storage: storage });
 //// this is for uploading images to server using multer as middleware  but it is not real time upload as
 ///   we are using socket.io for real time upload images
 app.post("/uploadImage", upload.single("testImage"), async (req, res) => {
-  // console.log("req.file==", req.file);
   const userId = req.body;
 
   try {
     const newPost = {
-      // userID: userId,
       image: {
         data: fs.readFileSync("uploads/" + req.file.filename), ////pendding
         contentType: "image/png",
@@ -223,16 +210,13 @@ app.post("/uploadImage", upload.single("testImage"), async (req, res) => {
       fileSize: req.file.size,
       filePath: req.file.path,
     };
-    // console.log("fileName: " + req.file.filename);
     const image = await userPost.create({ ...newPost });
-    // console.log("we are from the uploadImage route");
     res.status(200).json({
       success: true,
       imageName: image.fileName,
       imageUrl: `http:///localhost:5000/uploads/${image.fileName}`,
       image: image,
     });
-    // res.send("we are from the uploadImage route");
   } catch (error) {
     console.log("error from uploadImage", error);
     res.send("we are from the uploadImage error");
@@ -242,7 +226,6 @@ app.post("/uploadImage", upload.single("testImage"), async (req, res) => {
 //// deleting image from the server
 app.delete("/deleteImage/:imageName/:imageID", async (req, res) => {
   const { imageName, imageID } = req.params;
-  // console.log("delete req.query", imageName, " img_id", imageID);
   if (!imageName) {
     return res.status(400).json({
       success: false,
@@ -251,7 +234,6 @@ app.delete("/deleteImage/:imageName/:imageID", async (req, res) => {
   }
   try {
     const deleteImage = await Chats.findOneAndDelete({ _id: imageID });
-    // console.log("deleted_image", deleteImage);
     const image = await fs.unlinkSync(`./uploads/${imageName}`);
   } catch (error) {
     console.log("error from deleteImage", error);
@@ -264,57 +246,44 @@ app.use("/", userRouter);
 app.use("/", conversation);
 app.use("/", chatsRouter);
 if (process.env.NODE_ENV === "production") {
-  // console.log("production");
   app.use(express.static(path.join(__dirname, "tinder_clone", "build")));
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "tinder_clone", "build", "index.html"));
   });
-  app.get("/", (req, res) => {
-    res.send("Welcome server is lestening on ssl server.");
-  });
 }
 app.use((err, req, res, next) => {
   console.log("error from server endpoint", err);
-  // socket.emit("error", err);
-  io.emit("error", err);
+  // io.emit("error", err);
 });
 async function start() {
   try {
     await ConnectDB(process.env.MONGODB_URL);
-    // console.log("numCPUs", numCPUs);
-    // const sslServer = https.createServer(
-    //   {
-    //     key: fs.readFileSync(path.join(__dirname, "certs", "key.pem")),
-    //     cert: fs.readFileSync(path.join(__dirname, "certs", "cert.pem")),
-    //   },
-    //   app
-    // );
-    if (cluster.isMaster) {
-      for (let i = 0; i < 4; i++) {
-        cluster.fork();
-      }
-      cluster.on("exit", (worker, code, signal) => {
-        console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
-        cluster.fork();
-      });
-    } else {
-      server.listen(PORT, () => {
-        console.log(
-          `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-        );
-      });
-      // sslServer.listen(PORT, () => {
-      //   console.log(`Server is listening on port https://localhost:${PORT}...`);
-      // });
-    }
+    // if (cluster.isMaster) {
+    //   for (let i = 0; i < 4; i++) {
+    //     cluster.fork();
+    //   }
+    //   cluster.on("exit", (worker, code, signal) => {
+    //     console.log(`worker ${worker.id} exiteddied`, worker.process.pid);
+    //     cluster.fork();
+    //   });
+    // } else {
+    //   server.listen(PORT, () => {
+    //     console.log(
+    //       `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+    //     );
+    //   });
     // sslServer.listen(PORT, () => {
     //   console.log(`Server is listening on port https://localhost:${PORT}...`);
     // });
-    // server.listen(PORT, () => {
-    //   console.log(
-    //     `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
-    //   );
+    // }
+    // sslServer.listen(PORT, () => {
+    //   console.log(`Server is listening on port https://localhost:${PORT}...`);
     // });
+    server.listen(PORT, () => {
+      console.log(
+        `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
+      );
+    });
   } catch (error) {
     console.log("error from Connection making via Mongoose", error);
   }

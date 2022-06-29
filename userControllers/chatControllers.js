@@ -46,13 +46,11 @@ const updateImage = async (imageData, imageID, socket) => {
       socket.emit("newImageData", error);
       return;
     }
-    // console.log("imageData==******", imageData);
     const newImageData = await Message.findOneAndUpdate(
       { _id: imageID },
       imageData,
       { new: true, runValidators: true, overwrite: true }
     );
-    // console.log("newImageData ==**=", newImageData);
     socket.emit("newImageData", newImageData);
     return newImageData;
   } catch (err) {

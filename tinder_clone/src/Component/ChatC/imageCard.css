@@ -40,6 +40,10 @@
     /* background-color: red; */
 }
 
+.caption::-webkit-scrollbar {
+    display: none;
+}
+
 .image_button_icons {
     /* position: absolute; */
     /* margin-top: -20rem; */

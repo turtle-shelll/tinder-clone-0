@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import SingleChat from "./singleChat";
+import ChatScreenHeader from "./chatScreenHeader";
 import { Avatar } from "@material-ui/core";
 import ImageCard from "./imageCard";
 import "./chatscreen.css";
@@ -167,8 +167,8 @@ export default function ChatScreen() {
   return (
     <div className="chat_screen">
       {isOpen && <UpdateImage updateImage={updateImage} />}
-      <SingleChat
-        name={`${param.name}`}
+      <ChatScreenHeader
+        name={param.name}
         link={""}
         message={"is Typing..."}
         profilePic={param.profilePic}
@@ -241,7 +241,7 @@ export default function ChatScreen() {
               id="siofu"
               multiple
               accept="image/*"
-              onInput={(e) => {
+              onInput={async (e) => {
                 e.preventDefault();
 
                 uploadFileToServer(
@@ -252,7 +252,7 @@ export default function ChatScreen() {
                 );
                 setTimeout(() => {
                   handlePostImage(postImages);
-                }, 1500);
+                }, 1000);
               }}
             />
             <input

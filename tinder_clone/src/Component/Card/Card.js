@@ -12,7 +12,8 @@ function TinderCards() {
   const { allUsers } = useSelector((state) => state.root);
   const dispatch = useDispatch();
   const [people, setPeople] = useState([]);
-
+  // console.log("allUsers", allUsers);
+  // console.log("people--people==**", people);
   useEffect(() => {
     setPeople(allUsers);
   }, [allUsers]);

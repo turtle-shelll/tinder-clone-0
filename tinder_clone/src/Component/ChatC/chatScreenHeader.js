@@ -3,14 +3,14 @@ import React from "react";
 import { Avatar } from "@material-ui/core";
 import { Link, useNavigate } from "react-router-dom";
 import { IconButton } from "@material-ui/core";
-import { useSelector } from "react-redux";
+// import { useSelector } from "react-redux";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PhotoCameraFrontIcon from "@mui/icons-material/PhotoCameraFront";
 // import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import "./Single.css";
 
-const SingleChat = ({
+const ChatScreenHeader = ({
   name,
   link,
   message,
@@ -18,10 +18,8 @@ const SingleChat = ({
   profilePic,
   backButton,
   chatting,
-  make_conversation,
-  otherUser,
+  //   otherUser,
 }) => {
-  const { user } = useSelector((state) => state.root);
   const navigate = useNavigate();
 
   return (
@@ -33,22 +31,7 @@ const SingleChat = ({
       ) : (
         ""
       )}
-      <Link
-        onClick={() => {
-          make_conversation([user._id, otherUser._id]);
-        }}
-        to={`/chats/${link}`}
-        className="single_chat"
-        state={{
-          data: {
-            name,
-            message,
-            timeStamp,
-            profilePic,
-            otherUser,
-          },
-        }}
-      >
+      <Link to={`/chats/${link}`} className="single_chat">
         <div className="profilePic">
           <Avatar className="pic" alt={name} src={profilePic} />
         </div>
@@ -70,4 +53,4 @@ const SingleChat = ({
   );
 };
 
-export default SingleChat;
+export default ChatScreenHeader;
