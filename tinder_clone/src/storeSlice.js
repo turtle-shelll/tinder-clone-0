@@ -1,14 +1,22 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axios, MAIN_URL } from "./axios";
 
+
 import socketio from "socket.io-client";
 export const socket = socketio(MAIN_URL, { transports: ["websocket"] });
+console.log("MAIN_URL==", MAIN_URL);
+
+
 export const allUserInitialData = createAsyncThunk(
   "userSlice/allUserInitialData",
   async (arg, thunkApi) => {
+    // console.log("allUserInitialData==", arg);
+
     try {
       const { data } = await axios.get("/tinder/cards");
-      if (data.length >= 0) {
+      console.log("data from get all UserData==", data);
+
+      if (data) {
         thunkApi.dispatch(setAllUsers(data));
       }
     } catch (error) {
@@ -16,6 +24,22 @@ export const allUserInitialData = createAsyncThunk(
     }
   }
 );
+
+// const getAllUSerData = createAsyncThunk("getAllUserSlice", async (args, thunkApi) => {
+//   console.log("allUserInitialData==");
+//   try {
+//     const { data } = await axios.get("/tinder/cards");
+//     console.log("allUserInitialData==", data);
+//     if (data.length >= 0) {
+//       thunkApi.dispatch(setAllUsers(data));
+//     }
+//     // return data;
+//   } catch (error) {
+//     console.log("error from get all UserData==", error);
+//   }
+// });
+
+// getAllUSerData();
 
 export const FB_login = createAsyncThunk(
   "user/FB_login",
@@ -175,7 +199,7 @@ const userSlice = createSlice({
       //     }
       //   }
       // });
-      if (availableUser.length > 0) {
+      if (availableUser) {
         availableUser.forEach((userID) => {
           const alluser = [];
           dataArray.forEach((User) => {

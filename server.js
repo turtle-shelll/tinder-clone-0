@@ -258,6 +258,8 @@ app.use((err, req, res, next) => {
 async function start() {
   try {
     await ConnectDB(process.env.MONGODB_URL);
+    console.log("process.env.MONGODB_URL  ====>>>>>>", process.env.MONGODB_URL);
+
     // if (cluster.isMaster) {
     //   for (let i = 0; i < 4; i++) {
     //     cluster.fork();
@@ -272,13 +274,7 @@ async function start() {
     //       `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`
     //     );
     //   });
-    // sslServer.listen(PORT, () => {
-    //   console.log(`Server is listening on port https://localhost:${PORT}...`);
-    // });
     // }
-    // sslServer.listen(PORT, () => {
-    //   console.log(`Server is listening on port https://localhost:${PORT}...`);
-    // });
     server.listen(PORT, () => {
       console.log(
         `server Is listening on http://localhost:${PORT} && cluster ID", ${process.pid}`

@@ -181,6 +181,21 @@ const FacebookLogin = async (req, res) => {
     console.log("errorfrom FB_login==**", error);
   }
 };
+
+const CreateNewUser = async (req, res) => {
+  try {
+    const { fname, email, emailVerified, profilePicture } = req.body;
+    if (!fname, !email, !emailVerified, !profilePicture) {
+      return res.status(200).json({ success: false, message: "all the Above fields are required." });
+    };
+    const user = await User.create({ fname, email, emailVerified, profilePicture });
+    console.log("user==>>>>> ", user);
+    res.status(201).json({ success: true, user: user });
+  } catch (error) {
+    console.error("error from CreateNewUser==", error);
+  };
+};
+
 const addToChat = async (req, res) => {
   const { userID } = req.body;
   if (!userID) {
@@ -224,15 +239,10 @@ const checkStatus = async (req, res, next) => {
 
 const TinderUser = async (req, res) => {
   try {
-    const user = await await User.find(
-      {},
-      {
-        email: 1,
-        profilePicture: 1,
-        fname: 1,
-      }
-    );
-    // console.log("user==", user);
+    console.log("its working");
+    const user = await User.find({});
+    // const user = await User.findOne({ email: "hardik.20022013@gmail.com" });
+    console.log("user==", user);
     res.status(200).send(user);
   } catch (error) {
     console.log("errorfrom tinder/cards===", error);
@@ -240,4 +250,4 @@ const TinderUser = async (req, res) => {
   }
 };
 
-module.exports = { GoogleLogin, checkStatus, TinderUser, FacebookLogin };
+module.exports = { GoogleLogin, checkStatus, TinderUser, FacebookLogin, CreateNewUser };
